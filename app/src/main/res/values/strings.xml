@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">House Control</string>
+    <string name="widget_home">Home</string>
+    <string name="widget_home_description">Your home from above, lamps glowing, with its scenes</string>
+    <string name="widget_scenes">Scenes</string>
+    <string name="widget_scenes_description">One tap sets every light and air conditioner</string>
+    <string name="widget_lights">Lights</string>
+    <string name="widget_lights_description">Every lamp, a tap to switch</string>
+    <string name="tile_lights">All lights</string>
+    <string name="shortcut_settings">Settings</string>
+    <string name="shortcut_editor">Edit floor plan</string>
+</resources>

@@ -1,0 +1,30 @@
+# Build output
+build/
+.gradle/
+.kotlin/
+local.properties
+web/node_modules/
+web/dist/
+*.apk
+*.aab
+*.idsig
+
+# Signing keys and their passwords never go into the repository.
+.signing/
+*.jks
+*.keystore
+
+# Editors, macOS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Never commit a plan with real device IDs, or any credentials.
+plan.json
+plan.backup*.json
+smartlife.json
+tuya.json
+events.log
+.env
+.env.*

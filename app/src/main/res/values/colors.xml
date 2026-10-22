@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The 3D panel's palette (web/src/style.css), so the native screens read as the same app. -->
+    <color name="background">#FF0A0E1A</color>
+    <color name="raised">#FF131828</color>
+    <color name="accent">#FF3D8BFF</color>
+    <color name="warm">#FFFFB46B</color>
+    <color name="icon_sky_top">#FF5C3D85</color>
+    <color name="icon_sky_mid">#FF21295C</color>
+    <color name="icon_sky_bottom">#FF0D1229</color>
+    <color name="icon_house">#FFFFF2DB</color>
+</resources>

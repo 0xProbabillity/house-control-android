@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The floor plan travels with a backup; secrets cannot (their key never leaves this phone). -->
+<full-backup-content>
+    <exclude domain="file" path="secrets" />
+    <exclude domain="file" path="events.log" />
+    <exclude domain="sharedpref" path="sync.xml" />
+</full-backup-content>

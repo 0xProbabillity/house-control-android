@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="secrets" />
+        <exclude domain="file" path="events.log" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="secrets" />
+        <exclude domain="file" path="events.log" />
+    </device-transfer>
+</data-extraction-rules>
