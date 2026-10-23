@@ -44,7 +44,7 @@
   the home screen; scenes in the app icon's menu; *All lights* in Quick Settings. Every tap switches the real
   devices without opening the app.
 - **Phones and tablets, upright or on their side.** On its side the model gets the full height beside the panel.
-- **Optional: your Mac.** Pair with House Control on a Mac and the floor plan, device links and the Home Assistant
+- **Optional: your computer.** Pair with House Control on a Mac or a Windows PC and the floor plan, device links and the Home Assistant
   and Hue connections stay the same on both, whichever one you edit.
 - **Works without any hardware.** Until you connect something, every device is simulated, so you can try
   everything first.
@@ -111,7 +111,7 @@ Everything is set up on the phone, in **Settings** (the sliders button at the to
 Enter the User Code from *Smart Life → Me → Settings → Account and Security* and choose **Show sign-in code**. The
 code has to be scanned by the Smart Life app — which is usually on the very phone you are holding. So **Save code to
 the gallery**, then in Smart Life tap **+ → Scan**, then the album icon, and pick the code. **Share code** sends it to
-any other screen, and a paired Mac shows it by itself. The session stays on the phone, encrypted with a key that
+any other screen, and a paired Mac or PC shows it by itself. The session stays on the phone, encrypted with a key that
 never leaves it; Smart Life is read every 12 seconds while the app is open.
 
 ### Home Assistant
@@ -128,18 +128,22 @@ Choose **Pair** next to the bridge (or type its address from the Hue app → *Se
 the round button on the bridge within a minute. Lamps, light strips and plugs work; the thermometer in a Hue motion
 sensor can be an AC's room temperature. The bridge's event stream brings changes made in the Hue app at once.
 
-### Sync with a Mac (optional)
+### Sync with a Mac or PC (optional)
 
-1. On the Mac: right-click the House Control menu bar icon → **Pair iPhone…**. A QR code appears.
-2. On the phone: **Settings → Pair with Mac → Scan the code** (or **Paste pairing link** after **Copy Pairing Link**
-   on the Mac).
+The phone pairs with [House Control](https://github.com/0xProbabillity/house-control) on a Mac or with
+[House Control for Windows](https://github.com/0xProbabillity/house-control-windows) on a PC, in the same way.
+
+1. On the computer: right-click the House Control icon — in the menu bar on a Mac, in the taskbar's tray on a PC —
+   → **Pair Phone…** (**Pair iPhone…** in older versions). A QR code appears.
+2. On the phone: **Settings → Pair with Mac or PC → Scan the code** (or **Paste pairing link** after **Copy Pairing
+   Link** on the computer).
 
 From then on, whenever both are on the same Wi-Fi and the app is open, a plan saved on one reaches the other a
-moment later. A home set up on the phone first goes to the Mac. If both changed the plan while apart, the phone asks
+moment later. A home set up on the phone first goes to the computer. If both changed the plan while apart, the phone asks
 which one to keep. Home Assistant and Hue connections travel too; a Smart Life session does not (Tuya rotates its
-tokens), but the Mac fills in the User Code for you.
+tokens), but the computer fills in the User Code for you.
 
-Nothing goes through a server: the phone finds the Mac with DNS-SD (Bonjour) and the two talk over TLS 1.2 with a
+Nothing goes through a server: the phone finds the computer with DNS-SD (Bonjour) and the two talk over TLS 1.2 with a
 pre-shared key that only the QR code carries (`TLS_PSK_WITH_AES_128_GCM_SHA256`, the same as the iPhone app), so a
 device that never saw the code cannot connect.
 
@@ -162,10 +166,10 @@ or Hue straight away, and the panel shows the new state the next time it opens.
 ## Privacy and security
 
 House Control talks to the platforms you connect — Tuya's servers for Smart Life, your own Home Assistant, your Hue
-Bridge — to your paired Mac, and to nothing else. There is no account, no analytics and no backend of its own.
+Bridge — to your paired Mac or PC, and to nothing else. There is no account, no analytics and no backend of its own.
 
 - The floor plan lives in the app's private storage.
-- The Smart Life session, the Home Assistant token, the Hue key and the Mac pairing key are encrypted with AES-GCM
+- The Smart Life session, the Home Assistant token, the Hue key and the computer's pairing key are encrypted with AES-GCM
   under a non-exportable Android Keystore key, and are left out of backups. **Sign out** / **Disconnect** /
   **Unpair** delete them. No log contains a token or a key.
 - The Hue Bridge's certificate is self-signed: the phone trusts it when pairing, remembers its SHA-256 fingerprint

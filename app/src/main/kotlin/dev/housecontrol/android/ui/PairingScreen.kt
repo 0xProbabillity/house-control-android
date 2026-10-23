@@ -51,7 +51,7 @@ fun PairingScreen(model: AppModel, back: () -> Unit) {
     }
     val scan = rememberLauncherForActivityResult(ScanContract()) { result -> result.contents?.let(::take) }
 
-    Screen("Pair with Mac", onBack = back) {
+    Screen("Pair with Mac or PC", onBack = back) {
         val name = model.macName
         if (name != null) {
             Column(Modifier.fillMaxWidth().padding(top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally,
@@ -65,14 +65,14 @@ fun PairingScreen(model: AppModel, back: () -> Unit) {
         } else {
             Card(padding = 16.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text("On the Mac", style = Type.title)
-                    Numbered(1, "Click the house in the menu bar with the right mouse button and choose **Pair iPhone…**. A code appears.")
-                    Numbered(2, "macOS asks once whether House Control may find devices on your local network: allow it.")
+                    Text("On the computer", style = Type.title)
+                    Numbered(1, "Click the house with the right mouse button — in the menu bar on a Mac, in the taskbar's tray on a PC — and choose **Pair Phone…**. A code appears.")
+                    Numbered(2, "The first time, macOS or Windows asks whether House Control may use your local network: allow it.")
                     Numbered(3, "Scan the code with this phone.")
                 }
             }
             PrimaryButton("Scan the code", icon = R.drawable.lucide_scan_qr_code) {
-                scan.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("Point at the code on the Mac")
+                scan.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("Point at the code on the computer")
                     .setBeepEnabled(false).setOrientationLocked(false))
             }
             SecondaryButton("Paste pairing link", icon = R.drawable.lucide_clipboard_paste) {
@@ -80,7 +80,7 @@ fun PairingScreen(model: AppModel, back: () -> Unit) {
                 take(clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString())
             }
             problem?.let { Problem(it) }
-            Footnote("Or press Copy Pairing Link on the Mac, send it to this phone and paste it here. Nothing goes through a server: " +
+            Footnote("Or press Copy Pairing Link on the computer, send it to this phone and paste it here. Nothing goes through a server: " +
                 "the two talk over your Wi-Fi with a key only the code carries.")
         }
     }
