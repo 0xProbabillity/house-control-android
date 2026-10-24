@@ -66,7 +66,7 @@ fun PairingScreen(model: AppModel, back: () -> Unit) {
             Card(padding = 16.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Text("On the computer", style = Type.title)
-                    Numbered(1, "Click the house with the right mouse button — in the menu bar on a Mac, in the taskbar's tray on a PC — and choose **Pair Phone…**. A code appears.")
+                    Numbered(1, "Click the house with the right mouse button — in the menu bar on a Mac, in the taskbar's tray on a PC — and choose **Pair Phone…** (**Pair iPhone…** in older versions). A code appears.")
                     Numbered(2, "The first time, macOS or Windows asks whether House Control may use your local network: allow it.")
                     Numbered(3, "Scan the code with this phone.")
                 }

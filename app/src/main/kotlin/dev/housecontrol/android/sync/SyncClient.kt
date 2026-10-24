@@ -222,7 +222,7 @@ class SyncClient(private val context: Context, private val store: SecretStore, p
                 channel = null
                 // The handshake fails when the Mac's key was reset since this phone was paired.
                 if (error is SyncTransport.HandshakeFailure) {
-                    set(Status.Failed("${pairing.name} did not accept this pairing. Pair again on the computer: Pair Phone… in House Control's menu"))
+                    set(Status.Failed("${pairing.name} did not accept this pairing. Pair again on the computer: Pair Phone… (Pair iPhone… in older versions) in House Control's menu"))
                 } else if (running) {
                     set(Status.Searching)
                 }
