@@ -103,7 +103,7 @@ private fun HomeSection(model: AppModel, open: (Route) -> Unit) {
             SecondaryButton("Import file", Modifier.weight(1f), R.drawable.lucide_download) { model.requestImport() }
         }
         if (!model.hasCustomPlan) {
-            Footnote("Make your own home here, or pair with House Control on a Mac and the one drawn there arrives by itself.")
+            Footnote("Make your own home here, or pair with House Control on a Mac or PC and the one drawn there arrives by itself.")
         }
     }
 }
@@ -127,7 +127,7 @@ private fun ShortcutsSection(model: AppModel, open: (Route) -> Unit) {
 
 @Composable
 private fun MacSection(model: AppModel, open: (Route) -> Unit, confirm: (Confirmation) -> Unit) {
-    Section("Mac") {
+    Section("Mac or PC") {
         val name = model.macName
         if (name != null) {
             val status = model.syncStatus
@@ -141,7 +141,7 @@ private fun MacSection(model: AppModel, open: (Route) -> Unit, confirm: (Confirm
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 SecondaryButton("Sync now", Modifier.weight(1f), R.drawable.lucide_refresh_cw) { model.syncNow() }
                 SecondaryButton("Unpair", Modifier.width(120.dp), tint = Palette.red) {
-                    confirm(Confirmation("Unpair from $name?", "The floor plan stays on this phone but no longer follows the Mac.", "Unpair") {
+                    confirm(Confirmation("Unpair from $name?", "The floor plan stays on this phone but no longer follows the computer.", "Unpair") {
                         model.unpair()
                     })
                 }
@@ -153,13 +153,13 @@ private fun MacSection(model: AppModel, open: (Route) -> Unit, confirm: (Confirm
                     IconBadge(R.drawable.lucide_laptop, Palette.accent)
                     Spacer(Modifier.width(14.dp))
                     androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("Optional: a Mac", style = Type.title)
-                        Text("Pair with House Control on a Mac and your home — rooms, lamps, device links, connections — stays the same on both, " +
+                        Text("Optional: a Mac or PC", style = Type.title)
+                        Text("Pair with House Control on a Mac or PC and your home — rooms, lamps, device links, connections — stays the same on both, " +
                             "whichever one you edit.", style = TextStyle(fontSize = 14.sp, color = Palette.muted, lineHeight = 19.sp))
                     }
                 }
             }
-            PrimaryButton("Pair with Mac", icon = R.drawable.lucide_scan_qr_code) { open(Route.Pairing) }
+            PrimaryButton("Pair with Mac or PC", icon = R.drawable.lucide_scan_qr_code) { open(Route.Pairing) }
         }
     }
 }
@@ -222,7 +222,7 @@ private fun ConnectionsSection(model: AppModel, open: (Route) -> Unit) {
             LinkRow(R.drawable.lucide_lightbulb, "Philips Hue", model.hueName ?: "Pair your Hue Bridge", Palette.hue,
                 status = if (model.hueName != null) Palette.green else null) { open(Route.Hue) }
         }
-        Footnote("Home Assistant and Hue set up here or on your paired Mac work on both, shared over your encrypted link. " +
+        Footnote("Home Assistant and Hue set up here or on your paired computer work on both, shared over your encrypted link. " +
             "Apple Home exists only on Apple devices: add HomeKit or Matter accessories to Home Assistant to switch them here.")
     }
 }
@@ -238,7 +238,7 @@ private fun AboutSection() {
             InfoRow("Privacy", "No account, no analytics")
         }
         Footnote("House Control talks to your own devices: Tuya's servers for Smart Life, your Home Assistant, your Hue Bridge and " +
-            "your Mac. Nothing else leaves this phone.")
+            "your paired computer. Nothing else leaves this phone.")
         Card {
             LinkRow(R.drawable.lucide_globe, "Website", "Features, help and the Mac app", external = true) { browse(About.WEBSITE) }
             RowDivider()

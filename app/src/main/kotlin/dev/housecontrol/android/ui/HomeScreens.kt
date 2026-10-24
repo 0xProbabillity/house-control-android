@@ -65,14 +65,14 @@ fun WelcomeScreen(model: AppModel) {
         Column(Modifier.padding(vertical = 34.dp), verticalArrangement = Arrangement.spacedBy(26.dp)) {
             Feature(R.drawable.lucide_pointer, Palette.warm, "Tap a lamp, drag to dim",
                 "Lights, colours, air conditioners and scenes, right on the floor plan.")
-            Feature(R.drawable.lucide_pencil_ruler, Palette.accent, "Draw it here or on your Mac",
-                "Rooms, lamps and ACs, on this phone. Pair a Mac any time: both stay in sync.")
+            Feature(R.drawable.lucide_pencil_ruler, Palette.accent, "Draw it here or on your computer",
+                "Rooms, lamps and ACs, on this phone. Pair a Mac or PC any time: both stay in sync.")
             Feature(R.drawable.lucide_lightbulb, Palette.green, "Your real devices",
                 "Smart Life, Home Assistant and Philips Hue. Until you connect one, everything is simulated.")
         }
         PrimaryButton("Set up my home", icon = R.drawable.lucide_house) { model.finishWelcome(AppModel.WelcomeChoice.SetUpHere) }
         Spacer(Modifier.size(10.dp))
-        SecondaryButton("Pair with my Mac", icon = R.drawable.lucide_laptop) { model.finishWelcome(AppModel.WelcomeChoice.Pair) }
+        SecondaryButton("Pair with Mac or PC", icon = R.drawable.lucide_laptop) { model.finishWelcome(AppModel.WelcomeChoice.Pair) }
         Spacer(Modifier.size(4.dp))
         TextLink("Explore the demo home", color = Palette.muted) { model.finishWelcome(AppModel.WelcomeChoice.Demo) }
     }

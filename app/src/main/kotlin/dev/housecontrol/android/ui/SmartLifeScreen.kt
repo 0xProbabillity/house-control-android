@@ -142,7 +142,7 @@ fun SmartLifeScreen(model: AppModel, back: () -> Unit, done: () -> Unit) {
                             Spacer(Modifier.width(14.dp))
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text("The code is on $mac", style = Type.title)
-                                Text("Switch to Smart Life on this phone, tap the scanner on its Home tab and point it at the Mac's screen. " +
+                                Text("Switch to Smart Life on this phone, tap the scanner on its Home tab and point it at the computer's screen. " +
                                     "The code stays there while you are away; come back here when you have confirmed.",
                                     style = TextStyle(fontSize = 14.sp, color = Palette.muted, lineHeight = 19.sp))
                             }
@@ -155,7 +155,7 @@ fun SmartLifeScreen(model: AppModel, back: () -> Unit, done: () -> Unit) {
                             Step(1, "Save the code to the gallery (below).")
                             Step(2, "In Smart Life tap **+** → **Scan**, then the **album** icon, and pick the code.")
                             Step(3, "Confirm the login and come back here.")
-                            Text("Or show it on another screen: share it to a computer or tablet, or pair a Mac and it appears there.",
+                            Text("Or show it on another screen: share it to a computer or tablet, or pair a Mac or PC and it appears there.",
                                 style = TextStyle(fontSize = 13.5.sp, color = Palette.faint, lineHeight = 18.sp))
                         }
                     }
@@ -177,7 +177,7 @@ fun SmartLifeScreen(model: AppModel, back: () -> Unit, done: () -> Unit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     SecondaryButton("Share code", Modifier.weight(1f), R.drawable.lucide_share_2) { share(context, ticket.second) }
                     if (!onMac && model.macName != null) {
-                        SecondaryButton("Show on Mac", Modifier.weight(1f), R.drawable.lucide_laptop) { onMac = model.showOnMac(ticket.second) }
+                        SecondaryButton("Show on computer", Modifier.weight(1f), R.drawable.lucide_laptop) { onMac = model.showOnMac(ticket.second) }
                     }
                 }
                 TextLink("Cancel", color = Palette.muted) {
@@ -194,7 +194,7 @@ fun SmartLifeScreen(model: AppModel, back: () -> Unit, done: () -> Unit) {
                         Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(painterResource(R.drawable.lucide_laptop), null, Modifier.size(15.dp), tint = Palette.muted)
                             Spacer(Modifier.width(6.dp))
-                            Text("Filled in from your Mac", style = TextStyle(fontSize = 13.sp, color = Palette.muted))
+                            Text("Filled in from your computer", style = TextStyle(fontSize = 13.sp, color = Palette.muted))
                         }
                     }
                 }
