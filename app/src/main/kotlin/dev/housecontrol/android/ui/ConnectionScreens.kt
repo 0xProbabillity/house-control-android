@@ -117,10 +117,10 @@ fun HomeAssistantScreen(model: AppModel, insideEditor: Boolean, open: (Route) ->
                 }
                 if (!insideEditor) PrimaryButton("Link devices to your plan", icon = R.drawable.lucide_link_2) { open(Route.Devices) }
                 SecondaryButton("Disconnect", tint = Palette.red) {
-                    confirm = Confirmation("Disconnect Home Assistant?", "Its devices go back to being simulated, here and on your paired Mac.",
+                    confirm = Confirmation("Disconnect Home Assistant?", "Its devices go back to being simulated, here and on your paired computer.",
                         "Disconnect") { model.disconnect("homeassistant") }
                 }
-                Footnote("Connected on this phone or on your Mac, it works on both: they share the connection over their encrypted link.")
+                Footnote("Connected on this phone or on your paired computer, it works on both: they share the connection over their encrypted link.")
             }
         } else {
             Section("On this Wi-Fi") {
@@ -150,7 +150,7 @@ fun HomeAssistantScreen(model: AppModel, insideEditor: Boolean, open: (Route) ->
                 PrimaryButton("Connect", enabled = url.isNotBlank() && token.isNotBlank(), busy = busy) { connect() }
                 HelpCard("Where is the token?", "In Home Assistant open your profile (your name at the bottom of the sidebar) → **Security**. " +
                     "Under **Long-lived access tokens** tap **Create token**, name it “House Control” and copy it.")
-                Footnote("The token stays on this phone, encrypted with a key that never leaves it, and goes to the Mac you paired, over " +
+                Footnote("The token stays on this phone, encrypted with a key that never leaves it, and goes to the computer you paired, over " +
                     "your encrypted link. Lights, switches, climate devices and temperature sensors can then be linked to your plan.")
             }
         }
@@ -210,7 +210,7 @@ fun HueScreen(model: AppModel, insideEditor: Boolean, open: (Route) -> Unit, bac
                 Card { ListRow(R.drawable.lucide_lightbulb, name, model.hueInfo.optString("host"), Palette.hue, status = Palette.green) }
                 if (!insideEditor) PrimaryButton("Link devices to your plan", icon = R.drawable.lucide_link_2) { open(Route.Devices) }
                 SecondaryButton("Disconnect", tint = Palette.red) {
-                    confirm = Confirmation("Disconnect the Hue Bridge?", "Its lamps go back to being simulated, here and on your paired Mac.",
+                    confirm = Confirmation("Disconnect the Hue Bridge?", "Its lamps go back to being simulated, here and on your paired computer.",
                         "Disconnect") { model.disconnect("hue") }
                 }
             }
@@ -240,7 +240,7 @@ fun HueScreen(model: AppModel, insideEditor: Boolean, open: (Route) -> Unit, bac
                     }
                     SecondaryButton("Pair", enabled = host.isNotBlank()) { start(JSONObject().put("host", host.trim()).put("name", "Hue Bridge")) }
                     Footnote("No account needed: the bridge lets one app in when its button is pressed. The key it gives stays on this phone " +
-                        "and your paired Mac.")
+                        "and your paired computer.")
                 }
             }
         }
