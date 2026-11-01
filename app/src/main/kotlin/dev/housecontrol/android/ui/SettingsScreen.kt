@@ -90,6 +90,8 @@ private fun HomeSection(model: AppModel, open: (Route) -> Unit) {
             PlanRow(model, "home", "Apartment", "Demo · 5 rooms, simulated devices", R.drawable.lucide_building_2, Palette.accent)
             RowDivider()
             PlanRow(model, "studio", "Studio", "Demo · 3 rooms, simulated devices", R.drawable.lucide_layout_grid, Palette.accent)
+            RowDivider()
+            PlanRow(model, "house", "House", "Demo · 2 floors, 10 rooms, simulated devices", R.drawable.lucide_house, Palette.accent)
         }
         Card {
             LinkRow(R.drawable.lucide_pencil_ruler, "Edit floor plan", "Rooms, lamps, air conditioners, furniture") { model.openEditor() }

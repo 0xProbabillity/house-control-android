@@ -1,5 +1,6 @@
 package dev.housecontrol.android.core
 
+import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -40,7 +41,7 @@ data class DeviceChange(val kind: DeviceKind, val id: String, val patch: JSONObj
  */
 class HomeSnapshot(val json: JSONObject) {
     val name: String get() = json.optString("name", "Home")
-    /** "home" / "studio" for the bundled demos, "custom" for the user's own plan. */
+    /** "home" / "studio" / "house" for the bundled demos, "custom" for the user's own plan. */
     val plan: String get() = json.optString("plan", "home")
     /** Tells homes apart: the plan and its name. */
     val identity get() = "$plan:$name"
@@ -58,6 +59,29 @@ class HomeSnapshot(val json: JSONObject) {
     fun light(id: String) = lights.firstOrNull { it.optString("id") == id }
     fun ac(id: String) = acs.firstOrNull { it.optString("id") == id }
     fun lightsIn(room: String) = lights.filter { it.optString("room") == room }
+
+    /**
+     * On a home with several floors, the one the widgets draw (`shownLevel`, the floor with the
+     * most lamps on): its rooms, their lamps and ACs and its furniture. A home on one floor
+     * comes back as it is.
+     */
+    val shownFloor: HomeSnapshot
+        get() {
+            val level = json.string("shownLevel") ?: return this
+            val levels = json.objects("levels")
+            if (levels.size < 2) return this
+            val first = levels[0].optString("id")
+            val onIt = { item: JSONObject -> (item.string("level") ?: first) == level }
+            val rooms = rooms.filter(onIt)
+            val ids = rooms.map { it.optString("id") }.toSet()
+            val copy = JSONObject(json.toString())
+            copy.put("rooms", JSONArray(rooms))
+            copy.put("lights", JSONArray(lights.filter { it.optString("room") in ids }))
+            copy.put("acs", JSONArray(acs.filter { it.optString("room") in ids }))
+            copy.put("furniture", JSONArray(furniture.filter(onIt)))
+            copy.remove("shownLevel")
+            return HomeSnapshot(copy)
+        }
 
     /** The plan fragment `DeviceHub.setLinks` reads: each device with its links. */
     val linksPlan: JSONObject

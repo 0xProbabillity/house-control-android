@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0
+
+- **Homes on several floors.** Floors with their own names and ceiling heights; the 3D model shows one floor at a
+  time, standing on the ones under it, with buttons under it to switch. Picking a room or a device goes to its
+  floor. Stairs as furniture, and a new **House** demo on two floors (Settings and **New home**).
+- **A better floor plan editor:** floor tabs over the plan; a new floor copies the rooms of the one below or starts
+  as one big room, and the floor below shows faintly underneath with its stairs. Resize a room from any corner or
+  side, with edges snapping to the rooms around it; doors and windows slide along the walls and jump to the
+  nearest one, and their ends drag to make them wider; **Split in two**, **Duplicate** and **Turn**; **Add** has
+  windows, stairs and floors.
+- The Home widget draws the floor with the most lamps on; the Devices screen names each room's floor.
+- **Fixed:** the editor did not fill the screen in newer Android System WebView versions.
+
 ## 1.0.0 — 2026-10-22
 
 The first release of House Control for Android.

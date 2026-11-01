@@ -11,6 +11,7 @@ import { publishWidgets, runWidgetAction } from './widgets.js';
 const DEMO_PLANS = [
   { id: 'home', name: 'Demo · Apartment' },
   { id: 'studio', name: 'Demo · Studio' },
+  { id: 'house', name: 'Demo · House on two floors' },
 ];
 const STAGE_INSETS = [62, 50]; // header above, panel overlap below
 
@@ -75,6 +76,11 @@ async function boot() {
 
   try {
     world = createWorld(panel.canvas, config, store, {
+      level: savedLevel(config),
+      onLevel(id) {
+        panel.levelShown(id);
+        try { localStorage.setItem(levelKey(config), id); } catch { /* private mode */ }
+      },
       onHover: panel.showTooltip,
       onPick(target) {
         if (!target) return;
@@ -92,7 +98,10 @@ async function boot() {
   // On a phone the header sits lower (status bar) but is closer to the model.
   // On its side the model has the full height beside the panel: only the header to clear.
   const landscape = () => matchMedia('(orientation: landscape) and (min-width: 560px)').matches;
-  const applyInsets = () => (isPhone ? world.setInsets(50 + safeAreaTop(), landscape() ? 16 : 36) : world.setInsets(...STAGE_INSETS));
+  // The floor buttons of a home on several floors sit under the model: it moves up clear of them.
+  const floorsInset = config.levels.length > 1 ? 44 : 0;
+  const applyInsets = () => (isPhone ? world.setInsets(50 + safeAreaTop(), (landscape() ? 16 : 36) + floorsInset)
+    : world.setInsets(STAGE_INSETS[0], STAGE_INSETS[1] + floorsInset));
   applyInsets();
   new ResizeObserver(() => (isPhone ? applyInsets() : world.resize())).observe(panel.canvas);
 
@@ -219,6 +228,12 @@ async function boot() {
   post('ready', { summary: store.summary() });
   if (isNative) publishWidgets(config, store);
   window.__house = { store, world, panel, config }; // handy in the dev console
+}
+
+// The floor a home on several floors was last looked at, kept per home.
+const levelKey = (config) => `house.level:${config.name}`;
+function savedLevel(config) {
+  try { return localStorage.getItem(levelKey(config)); } catch { return null; }
 }
 
 // A still of the 3D model for an AI checking its own edit: a second, off-screen world

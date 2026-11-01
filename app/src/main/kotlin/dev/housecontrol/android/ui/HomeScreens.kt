@@ -100,6 +100,7 @@ fun NewHomeScreen(model: AppModel, close: () -> Unit) {
         Triple<String?, String, String>(null, "One room", "Draw the rest yourself, or add your devices to it"),
         Triple("studio", "Studio layout", "3 rooms with furniture, to adapt"),
         Triple("home", "Apartment layout", "5 rooms with furniture, to adapt"),
+        Triple("house", "House on two floors", "10 rooms and stairs, to adapt"),
     )
     fun create() = model.createHome(name.trim(), template)
 
@@ -112,7 +113,12 @@ fun NewHomeScreen(model: AppModel, close: () -> Unit) {
                 templates.forEachIndexed { i, (id, title, detail) ->
                     if (i > 0) RowDivider()
                     ListRow(
-                        when (id) { null -> R.drawable.lucide_square_dashed; "studio" -> R.drawable.lucide_layout_grid; else -> R.drawable.lucide_building_2 },
+                        when (id) {
+                            null -> R.drawable.lucide_square_dashed
+                            "studio" -> R.drawable.lucide_layout_grid
+                            "house" -> R.drawable.lucide_house
+                            else -> R.drawable.lucide_building_2
+                        },
                         title, detail, if (id == null) Palette.warm else Palette.accent, onClick = { template = id },
                     ) { Check(template == id) }
                 }

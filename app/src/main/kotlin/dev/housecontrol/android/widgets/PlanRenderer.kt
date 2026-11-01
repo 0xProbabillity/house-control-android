@@ -20,7 +20,9 @@ import kotlin.math.pow
  * walls and every lamp that is on glowing in its own colour, as the 3D view lights the rooms.
  */
 object PlanRenderer {
-    fun render(snapshot: HomeSnapshot, width: Int, height: Int): Bitmap {
+    fun render(home: HomeSnapshot, width: Int, height: Int): Bitmap {
+        // A home on several floors: the floor with the most lamps on.
+        val snapshot = home.shownFloor
         val bitmap = Bitmap.createBitmap(max(1, width), max(1, height), Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val rooms = snapshot.rooms

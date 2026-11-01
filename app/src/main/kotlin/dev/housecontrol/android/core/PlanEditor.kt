@@ -22,21 +22,36 @@ class PlanEditor(plan: JSONObject) {
 
     data class DeviceRef(val service: String, val id: String)
 
-    data class Room(val id: String, val name: String)
+    data class Room(val id: String, val name: String, val floor: String? = null) {
+        /** "Bedroom", or "Bedroom · First floor" where two floors could have one. */
+        val title get() = floor?.let { "$name · $it" } ?: name
+    }
+
+    /** The floors of a home on several, lowest first (id to name); empty for a home on one. */
+    val levels: List<Pair<String, String>>
+        get() {
+            val list = plan.objects("levels").mapNotNull { level -> level.string("id")?.let { it to (level.string("name") ?: it) } }
+            return if (list.size > 1) list else emptyList()
+        }
 
     // MARK: - Reading
 
     val name: String get() = plan.string("name") ?: "Home"
 
     val rooms: List<Room>
-        get() = plan.objects("rooms").mapNotNull { room ->
-            val id = room.string("id") ?: return@mapNotNull null
-            Room(id, room.string("name") ?: id)
+        get() {
+            val levels = levels
+            val names = levels.toMap()
+            return plan.objects("rooms").mapNotNull { room ->
+                val id = room.string("id") ?: return@mapNotNull null
+                val floor = if (levels.isEmpty()) null else names[room.string("level") ?: levels[0].first]
+                Room(id, room.string("name") ?: id, floor)
+            }
         }
 
     val items: List<Item>
         get() {
-            val names = rooms.associate { it.id to it.name }
+            val names = rooms.associate { it.id to it.title }
             val out = mutableListOf<Item>()
             for ((kind, key) in listOf(DeviceKind.LIGHT to "lights", DeviceKind.AC to "acs")) {
                 for (device in plan.objects(key)) {
@@ -210,14 +225,17 @@ class PlanEditor(plan: JSONObject) {
         }
     }
 
-    /** Adds a room east of the others; returns its id. */
+    /** Adds a room east of the others (on the first floor of a home with several); returns its id. */
     fun addRoom(name: String, width: Double = 4.0, depth: Double = 3.5): String {
         val rooms = plan.optJSONArray("rooms") ?: JSONArray().also { plan.put("rooms", it) }
-        val rects = rooms.objects().mapNotNull { r -> r.optJSONArray("rect")?.takeIf { it.length() == 4 }?.let { a -> (0 until 4).map { a.optDouble(it) } } }
+        val ground = levels.firstOrNull()?.first
+        val rects = rooms.objects().filter { ground == null || (it.string("level") ?: ground) == ground }.mapNotNull { r -> r.optJSONArray("rect")?.takeIf { it.length() == 4 }?.let { a -> (0 until 4).map { a.optDouble(it) } } }
         val maxX = rects.maxOfOrNull { it[0] + it[2] } ?: 0.0
         val minZ = rects.minOfOrNull { it[1] } ?: 0.0
         val id = uniqueId(slug(name), allIds)
-        rooms.put(jsonOf("id" to id, "name" to name, "rect" to listOf(fix(maxX), fix(minZ), width, depth), "floor" to "oak"))
+        val room = jsonOf("id" to id, "name" to name, "rect" to listOf(fix(maxX), fix(minZ), width, depth), "floor" to "oak")
+        if (ground != null) room.put("level", ground)
+        rooms.put(room)
         return id
     }
 

@@ -10,4 +10,7 @@ what Android needs on top:
 - `src/style.css` adds the side safe areas, the tablet layout and the layout on its side.
 - `vite.config.js` targets Chrome 100 as well as Safari 17.
 
+On top of that revision it carries upstream's homes on several floors and the reworked floor plan editor
+(upstream commit 85a440b), with handles kept clear of Android's back gesture.
+
 The Gradle build runs `npm ci` and `npm run build` here and packs `dist/` into the app.

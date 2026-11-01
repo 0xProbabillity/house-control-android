@@ -13,7 +13,7 @@ class PlanStore(val directory: File) {
     val customPlanFile = File(directory, "plan.json")
     private val settingsFile = File(directory, "settings.json")
 
-    /** "home" / "studio" for the bundled demos, or "custom" for plan.json. */
+    /** "home" / "studio" / "house" for the bundled demos, or "custom" for plan.json. */
     var activePlan = "home"
         private set
 
@@ -62,7 +62,7 @@ class PlanStore(val directory: File) {
     }
 
     companion object {
-        val BUNDLED = listOf("home", "studio")
+        val BUNDLED = listOf("home", "studio", "house")
 
         fun revision(data: ByteArray): String =
             MessageDigest.getInstance("SHA-256").digest(data).take(8).joinToString("") { "%02x".format(it) }

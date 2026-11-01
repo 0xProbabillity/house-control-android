@@ -68,6 +68,33 @@ class PlanTests {
         assertEquals(1, editor.plan.getJSONArray("lights").length())
     }
 
+    @Test fun aHomeOnSeveralFloors() {
+        val house = JSONObject(File("../web/public/plans/house.json").readText())
+        val editor = PlanEditor(house)
+        assertEquals(listOf("ground" to "Ground floor", "upper" to "First floor"), editor.levels)
+        assertEquals("Kids room · First floor", editor.rooms.first { it.id == "kids" }.title)
+        assertTrue(PlanEditor(demo).levels.isEmpty())
+        assertEquals("Living", PlanEditor(demo).rooms.first().title)
+        // A new room goes on the ground floor.
+        val id = editor.addRoom("Garage")
+        val garage = editor.plan.getJSONArray("rooms").let { a -> (0 until a.length()).map { a.getJSONObject(it) } }.first { it.getString("id") == id }
+        assertEquals("ground", garage.getString("level"))
+
+        val snapshot = HomeSnapshot(JSONObject("""{"name":"House","plan":"house","shownLevel":"up",
+            "levels":[{"id":"ground","name":"Ground floor"},{"id":"up","name":"First floor"}],
+            "rooms":[{"id":"hall","name":"Hall","x":0,"z":0,"w":4,"d":3,"level":"ground"},{"id":"bed","name":"Bedroom","x":0,"z":0,"w":4,"d":3,"level":"up"}],
+            "lights":[{"id":"a","room":"hall","on":true},{"id":"b","room":"bed","on":true}],
+            "acs":[{"id":"ac","room":"hall","on":false}],
+            "furniture":[{"type":"sofa","x":1,"z":1,"w":2,"d":1,"level":"ground"},{"type":"bed","x":1,"z":1,"w":2,"d":2,"level":"up"}],
+            "scenes":[]}"""))
+        val up = snapshot.shownFloor
+        assertEquals(listOf("bed"), up.rooms.map { it.getString("id") })
+        assertEquals(listOf("b"), up.lights.map { it.getString("id") })
+        assertTrue(up.acs.isEmpty())
+        assertEquals(listOf("bed"), up.furniture.map { it.getString("type") })
+        assertEquals(2, snapshot.lights.size)
+    }
+
     private fun snapshot() = HomeSnapshot(JSONObject("""{"name":"Home","plan":"custom","rooms":[{"id":"r","name":"Room","x":0,"z":0,"w":4,"d":3}],
         "lights":[{"id":"a","room":"r","type":"ceiling","capabilities":["brightness","temp"],"on":false,"brightness":1,"temp":3000,"color":"#ff0000",
                    "links":{"link":{"service":"hue","id":"x"}}},

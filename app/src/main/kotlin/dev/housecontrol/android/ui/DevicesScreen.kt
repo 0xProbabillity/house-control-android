@@ -137,7 +137,7 @@ fun DevicesScreen(model: AppModel, back: () -> Unit) {
             for (room in editor.rooms) {
                 val items = editor.items.filter { it.room == room.id }
                 if (items.isEmpty()) continue
-                Section(room.name) {
+                Section(room.title) {
                     Card {
                         items.forEachIndexed { i, item ->
                             if (i > 0) RowDivider()
@@ -232,7 +232,7 @@ private fun AddDevicesScreen(
             Card {
                 rooms.forEachIndexed { i, r ->
                     if (i > 0) RowDivider()
-                    ListRow(R.drawable.lucide_square_dashed, r.name, null, Palette.accent, onClick = { room = r.id }) { Check(room == r.id) }
+                    ListRow(R.drawable.lucide_square_dashed, r.title, null, Palette.accent, onClick = { room = r.id }) { Check(room == r.id) }
                 }
                 if (rooms.isNotEmpty()) RowDivider()
                 ListRow(R.drawable.lucide_house_plus, "New room…", null, Palette.warm, onClick = { room = NEW_ROOM }) { Check(room == NEW_ROOM) }
