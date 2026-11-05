@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Chinese.** House Control now speaks Simplified Chinese: the native screens, the widgets and
+  the bundled web UI (the 3D home, the panel and the floor plan editor). The app follows the
+  phone's language, and on Android 13 and later it is listed in Settings → Apps → House Control
+  → Language. English is unchanged.
+
 ## 1.1.0
 
 - **Homes on several floors.** Floors with their own names and ceiling heights; the 3D model shows one floor at a
