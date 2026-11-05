@@ -31,7 +31,8 @@
   and the same renderer as House Control on the Mac and iPhone. Lamps light the scene the way they light the room;
   an air conditioner that runs blows visible air.
 - **Lights.** Tap a lamp in the 3D view or its tile to toggle it, drag across a tile to dim, touch and hold for
-  brightness, white temperature and colour.
+  brightness, white temperature and colour. One finger turns the model all the way round; two move it and pinch to
+  zoom, so every lamp is within reach.
 - **Air conditioners.** Power, target temperature, mode, fan speed, swing, sleep and eco — whatever the unit offers —
   with the room temperature from a real sensor if you have one.
 - **Scenes.** One tap sets every light and AC: "Cozy", "Movie", "Night", or your own.
