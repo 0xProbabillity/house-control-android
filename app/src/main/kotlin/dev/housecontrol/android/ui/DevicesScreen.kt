@@ -170,9 +170,11 @@ fun DevicesScreen(model: AppModel, back: () -> Unit) {
             }
         }
         if (model.hasAnyConnection) PrimaryButton(stringResource(R.string.action_add_devices), icon = R.drawable.lucide_plus, enabled = loaded) { adding = true }
+        val macName = model.macName
         Footnote(when {
             model.activePlan != "custom" -> stringResource(R.string.devices_footnote_demo)
-            model.macName != null -> stringResource(R.string.devices_footnote_mac, model.macName)
+            // macName is a delegated property: a local can be smart cast, the property cannot.
+            macName != null -> stringResource(R.string.devices_footnote_mac, macName)
             else -> stringResource(R.string.devices_footnote_local)
         })
     }

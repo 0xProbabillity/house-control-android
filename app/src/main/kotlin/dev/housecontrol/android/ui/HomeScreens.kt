@@ -101,8 +101,10 @@ fun NewHomeScreen(model: AppModel, close: () -> Unit) {
     // Read in the composable scope: a button's callback is a plain lambda, where a resource
     // cannot be looked up any more.
     val replaceTitle = stringResource(R.string.confirm_replace_title, model.customPlanName ?: stringResource(R.string.newhome_home_lower))
-    val replaceMessage = if (model.macName == null) stringResource(R.string.confirm_replace_message_no_mac)
-        else stringResource(R.string.confirm_replace_message_with_mac, model.macName)
+    // macName is a delegated property: a local can be smart cast, the property cannot.
+    val macName = model.macName
+    val replaceMessage = if (macName == null) stringResource(R.string.confirm_replace_message_no_mac)
+        else stringResource(R.string.confirm_replace_message_with_mac, macName)
     val replaceAction = stringResource(R.string.action_replace)
     val templates = listOf(
         Triple<String?, String, String>(null, stringResource(R.string.newhome_template_one_room), stringResource(R.string.newhome_template_one_room_detail)),
