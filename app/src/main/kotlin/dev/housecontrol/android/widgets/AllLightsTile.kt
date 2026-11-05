@@ -22,7 +22,7 @@ class AllLightsTile : TileService() {
             snapshot.lightsOn > 0 -> Tile.STATE_ACTIVE
             else -> Tile.STATE_INACTIVE
         }
-        if (android.os.Build.VERSION.SDK_INT >= 29) tile.subtitle = snapshot?.let(::statusLine)
+        if (android.os.Build.VERSION.SDK_INT >= 29) tile.subtitle = snapshot?.let { statusLine(this@AllLightsTile, it) }
         tile.updateTile()
     }
 }

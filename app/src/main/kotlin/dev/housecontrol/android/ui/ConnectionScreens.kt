@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -75,6 +76,12 @@ fun bold(text: String) = buildAnnotatedString {
 @Composable
 fun HomeAssistantScreen(model: AppModel, insideEditor: Boolean, open: (Route) -> Unit, back: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val defaultServerName = stringResource(R.string.service_home_assistant)
+    // Read in the composable scope: a button's callback is a plain lambda, where a resource
+    // cannot be looked up any more.
+    val disconnectTitle = stringResource(R.string.confirm_disconnect_ha_title)
+    val disconnectMessage = stringResource(R.string.confirm_disconnect_ha_message)
+    val disconnectAction = stringResource(R.string.action_disconnect)
     var url by remember { mutableStateOf("") }
     var token by remember { mutableStateOf("") }
     var found by remember { mutableStateOf(listOf<JSONObject>()) }
@@ -105,53 +112,52 @@ fun HomeAssistantScreen(model: AppModel, insideEditor: Boolean, open: (Route) ->
     }
     LaunchedEffect(Unit) { if (model.homeAssistantName == null) scan() }
 
-    Screen("Home Assistant", onBack = back) {
+    Screen(stringResource(R.string.service_home_assistant), onBack = back) {
         val name = model.homeAssistantName
         if (name != null) {
-            Section("Server") {
+            Section(stringResource(R.string.ha_section_server)) {
                 Card {
                     val info = model.homeAssistantInfo
-                    val line = listOfNotNull(info.optString("url"), info.optString("version").takeIf { it.isNotEmpty() }?.let { "version $it" })
-                        .joinToString(" · ")
+                    val version = info.optString("version")
+                    val versionLabel = if (version.isNotEmpty()) stringResource(R.string.ha_version, version) else null
+                    val line = listOfNotNull(info.optString("url"), versionLabel).joinToString(" · ")
                     ListRow(R.drawable.lucide_house_wifi, name, line, Palette.homeAssistant, status = Palette.green)
                 }
-                if (!insideEditor) PrimaryButton("Link devices to your plan", icon = R.drawable.lucide_link_2) { open(Route.Devices) }
-                SecondaryButton("Disconnect", tint = Palette.red) {
-                    confirm = Confirmation("Disconnect Home Assistant?", "Its devices go back to being simulated, here and on your paired computer.",
-                        "Disconnect") { model.disconnect("homeassistant") }
+                if (!insideEditor) PrimaryButton(stringResource(R.string.action_link_devices), icon = R.drawable.lucide_link_2) { open(Route.Devices) }
+                SecondaryButton(stringResource(R.string.action_disconnect), tint = Palette.red) {
+                    confirm = Confirmation(disconnectTitle, disconnectMessage,
+                        disconnectAction) { model.disconnect("homeassistant") }
                 }
-                Footnote("Connected on this phone or on your paired computer, it works on both: they share the connection over their encrypted link.")
+                Footnote(stringResource(R.string.ha_footnote))
             }
         } else {
-            Section("On this Wi-Fi") {
+            Section(stringResource(R.string.ha_section_on_wifi)) {
                 Card {
                     when {
-                        scanning -> Busy("Looking for Home Assistant…")
-                        found.isEmpty() -> Text("None found by itself. Type its address below.", Modifier.padding(16.dp), style = Type.body)
+                        scanning -> Busy(stringResource(R.string.ha_looking))
+                        found.isEmpty() -> Text(stringResource(R.string.ha_none_found), Modifier.padding(16.dp), style = Type.body)
                         else -> found.forEachIndexed { i, server ->
                             if (i > 0) RowDivider()
                             val address = server.optString("url")
-                            ListRow(R.drawable.lucide_house_wifi, server.optString("name", "Home Assistant"), address, Palette.homeAssistant,
+                            ListRow(R.drawable.lucide_house_wifi, server.optString("name", defaultServerName), address, Palette.homeAssistant,
                                 onClick = { url = address }) { Check(url == address) }
                         }
                     }
                 }
-                if (!scanning) TextLink("Look again", R.drawable.lucide_radar) { scope.launch { scan() } }
+                if (!scanning) TextLink(stringResource(R.string.action_look_again), R.drawable.lucide_radar) { scope.launch { scan() } }
             }
-            Section("Connect") {
+            Section(stringResource(R.string.action_connect)) {
                 Card(padding = 16.dp) {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        InputField("Address", url, { url = it }, "http://homeassistant.local:8123", keyboard = KeyboardType.Uri, imeAction = ImeAction.Next)
-                        InputField("Long-lived access token", token, { token = it }, "Paste it here", secret = true, imeAction = ImeAction.Go,
+                        InputField(stringResource(R.string.ha_address_label), url, { url = it }, "http://homeassistant.local:8123", keyboard = KeyboardType.Uri, imeAction = ImeAction.Next)
+                        InputField(stringResource(R.string.ha_token_label), token, { token = it }, stringResource(R.string.ha_token_placeholder), secret = true, imeAction = ImeAction.Go,
                             onSubmit = { if (url.isNotBlank() && token.isNotBlank()) connect() })
                     }
                 }
                 problem?.let { Problem(it) }
-                PrimaryButton("Connect", enabled = url.isNotBlank() && token.isNotBlank(), busy = busy) { connect() }
-                HelpCard("Where is the token?", "In Home Assistant open your profile (your name at the bottom of the sidebar) → **Security**. " +
-                    "Under **Long-lived access tokens** tap **Create token**, name it “House Control” and copy it.")
-                Footnote("The token stays on this phone, encrypted with a key that never leaves it, and goes to the computer you paired, over " +
-                    "your encrypted link. Lights, switches, climate devices and temperature sensors can then be linked to your plan.")
+                PrimaryButton(stringResource(R.string.action_connect), enabled = url.isNotBlank() && token.isNotBlank(), busy = busy) { connect() }
+                HelpCard(stringResource(R.string.ha_token_help_title), stringResource(R.string.ha_token_help_text))
+                Footnote(stringResource(R.string.ha_token_footnote))
             }
         }
     }
@@ -162,6 +168,13 @@ fun HomeAssistantScreen(model: AppModel, insideEditor: Boolean, open: (Route) ->
 @Composable
 fun HueScreen(model: AppModel, insideEditor: Boolean, open: (Route) -> Unit, back: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val defaultBridgeName = stringResource(R.string.service_hue_bridge)
+    val buttonTimeout = stringResource(R.string.hue_button_timeout)
+    // Read in the composable scope: a button's callback is a plain lambda, where a resource
+    // cannot be looked up any more.
+    val disconnectTitle = stringResource(R.string.confirm_disconnect_hue_title)
+    val disconnectMessage = stringResource(R.string.confirm_disconnect_hue_message)
+    val disconnectAction = stringResource(R.string.action_disconnect)
     var found by remember { mutableStateOf(listOf<JSONObject>()) }
     var scanning by remember { mutableStateOf(false) }
     var host by remember { mutableStateOf("") }
@@ -198,49 +211,47 @@ fun HueScreen(model: AppModel, insideEditor: Boolean, open: (Route) -> Unit, bac
             }
             delay(2000)
         }
-        problem = "Nobody pressed the button in time. Try again."
+        problem = buttonTimeout
         pairing = null
     }
 
-    Screen("Philips Hue", onBack = back) {
+    Screen(stringResource(R.string.service_philips_hue), onBack = back) {
         val name = model.hueName
         val waiting = pairing
         when {
-            name != null -> Section("Bridge") {
+            name != null -> Section(stringResource(R.string.hue_section_bridge)) {
                 Card { ListRow(R.drawable.lucide_lightbulb, name, model.hueInfo.optString("host"), Palette.hue, status = Palette.green) }
-                if (!insideEditor) PrimaryButton("Link devices to your plan", icon = R.drawable.lucide_link_2) { open(Route.Devices) }
-                SecondaryButton("Disconnect", tint = Palette.red) {
-                    confirm = Confirmation("Disconnect the Hue Bridge?", "Its lamps go back to being simulated, here and on your paired computer.",
-                        "Disconnect") { model.disconnect("hue") }
+                if (!insideEditor) PrimaryButton(stringResource(R.string.action_link_devices), icon = R.drawable.lucide_link_2) { open(Route.Devices) }
+                SecondaryButton(stringResource(R.string.action_disconnect), tint = Palette.red) {
+                    confirm = Confirmation(disconnectTitle, disconnectMessage,
+                        disconnectAction) { model.disconnect("hue") }
                 }
             }
-            waiting != null -> PressButton(waiting.optString("name", "Hue Bridge"), secondsLeft) { pairing = null }
+            waiting != null -> PressButton(waiting.optString("name", defaultBridgeName), secondsLeft) { pairing = null }
             else -> {
-                Section("On this Wi-Fi") {
+                Section(stringResource(R.string.ha_section_on_wifi)) {
                     Card {
                         when {
-                            scanning -> Busy("Looking for Hue Bridges…")
-                            found.isEmpty() -> Text("No bridge found by itself. Type its address below — the Hue app shows it under " +
-                                "Settings → My Hue System.", Modifier.padding(16.dp), style = Type.body)
+                            scanning -> Busy(stringResource(R.string.hue_looking))
+                            found.isEmpty() -> Text(stringResource(R.string.hue_no_bridge), Modifier.padding(16.dp), style = Type.body)
                             else -> found.forEachIndexed { i, bridge ->
                                 if (i > 0) RowDivider()
-                                ListRow(R.drawable.lucide_lightbulb, bridge.optString("name", "Hue Bridge"), bridge.optString("host"), Palette.hue) {
-                                    PillButton("Pair") { start(bridge) }
+                                ListRow(R.drawable.lucide_lightbulb, bridge.optString("name", defaultBridgeName), bridge.optString("host"), Palette.hue) {
+                                    PillButton(stringResource(R.string.action_pair_hue)) { start(bridge) }
                                 }
                             }
                         }
                     }
                     problem?.let { Problem(it) }
-                    if (!scanning) TextLink("Look again", R.drawable.lucide_radar) { scope.launch { scan() } }
+                    if (!scanning) TextLink(stringResource(R.string.action_look_again), R.drawable.lucide_radar) { scope.launch { scan() } }
                 }
-                Section("Or by address") {
+                Section(stringResource(R.string.hue_section_or_address)) {
                     Card(padding = 16.dp) {
-                        InputField("Bridge address", host, { host = it }, "e.g. 192.168.1.20", keyboard = KeyboardType.Uri, imeAction = ImeAction.Go,
+                        InputField(stringResource(R.string.hue_bridge_address_label), host, { host = it }, stringResource(R.string.hue_address_placeholder), keyboard = KeyboardType.Uri, imeAction = ImeAction.Go,
                             onSubmit = { if (host.isNotBlank()) start(JSONObject().put("host", host.trim()).put("name", "Hue Bridge")) })
                     }
-                    SecondaryButton("Pair", enabled = host.isNotBlank()) { start(JSONObject().put("host", host.trim()).put("name", "Hue Bridge")) }
-                    Footnote("No account needed: the bridge lets one app in when its button is pressed. The key it gives stays on this phone " +
-                        "and your paired computer.")
+                    SecondaryButton(stringResource(R.string.action_pair_hue), enabled = host.isNotBlank()) { start(JSONObject().put("host", host.trim()).put("name", "Hue Bridge")) }
+                    Footnote(stringResource(R.string.hue_pair_footnote))
                 }
             }
         }
@@ -257,9 +268,9 @@ private fun PressButton(name: String, secondsLeft: Int, cancel: () -> Unit) {
             Box(Modifier.size(150.dp).scale(pulse.value).alpha(2 - pulse.value).border(3.dp, Palette.hue.copy(alpha = 0.7f), CircleShape))
             Box(Modifier.size(56.dp).shadow(18.dp, CircleShape, spotColor = Palette.hue).background(Color.White.copy(alpha = 0.9f), CircleShape))
         }
-        Text("Press the round button on the bridge", style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Palette.text,
+        Text(stringResource(R.string.hue_press_button), style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Palette.text,
             textAlign = TextAlign.Center))
-        Text("$name · waiting $secondsLeft s", style = TextStyle(fontSize = 15.sp, color = Palette.muted))
-        SecondaryButton("Cancel", onClick = cancel)
+        Text(stringResource(R.string.hue_waiting, name, secondsLeft), style = TextStyle(fontSize = 15.sp, color = Palette.muted))
+        SecondaryButton(stringResource(R.string.action_cancel), onClick = cancel)
     }
 }

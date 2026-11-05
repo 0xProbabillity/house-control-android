@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -92,20 +93,20 @@ fun Root(model: AppModel) {
         AlertDialog(
             onDismissRequest = { model.planChoice = null },
             containerColor = Palette.raised,
-            title = { Text("Which home do you keep?", color = Palette.text) },
+            title = { Text(stringResource(R.string.plan_choice_title), color = Palette.text) },
             text = {
                 Text(
                     if (choice.macPlanName == choice.phonePlanName)
-                        "“${choice.phonePlanName}” was changed both here and on ${choice.macName} since they last synced. The one you keep replaces the other on both."
-                    else "This phone has “${choice.phonePlanName}”, ${choice.macName} has “${choice.macPlanName}”. The one you keep replaces the other on both.",
+                        stringResource(R.string.plan_choice_message_same, choice.phonePlanName, choice.macName)
+                    else stringResource(R.string.plan_choice_message_different, choice.phonePlanName, choice.macName, choice.macPlanName),
                     color = Palette.muted,
                 )
             },
-            confirmButton = { TextButton({ model.resolvePlanChoice(keepPhone = true) }) { Text("Keep this phone’s", color = Palette.accent) } },
+            confirmButton = { TextButton({ model.resolvePlanChoice(keepPhone = true) }) { Text(stringResource(R.string.plan_choice_keep_phone), color = Palette.accent) } },
             dismissButton = {
                 Row {
-                    TextButton({ model.planChoice = null }) { Text("Later", color = Palette.muted) }
-                    TextButton({ model.resolvePlanChoice(keepPhone = false) }) { Text("Keep ${choice.macName}’s", color = Palette.accent) }
+                    TextButton({ model.planChoice = null }) { Text(stringResource(R.string.plan_choice_later), color = Palette.muted) }
+                    TextButton({ model.resolvePlanChoice(keepPhone = false) }) { Text(stringResource(R.string.plan_choice_keep_mac, choice.macName), color = Palette.accent) }
                 }
             },
         )
