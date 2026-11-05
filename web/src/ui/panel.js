@@ -7,6 +7,7 @@ import { lightColor } from '../three/lights.js';
 import { MODE_COLORS } from '../three/ac.js';
 import { AC_SWINGS } from '../store.js';
 import { haptic, isPhone } from '../bridge.js';
+import { t, tf } from '../i18n.js';
 
 const MODE_LABEL = { cool: 'Cool', heat: 'Heat', dry: 'Dry', fan: 'Fan', auto: 'Auto' };
 const FAN_LABEL = { auto: 'Auto', low: 'Low', medium: 'Medium', high: 'High', turbo: 'Turbo' };
@@ -22,8 +23,8 @@ const tmp = new THREE.Color();
 const css = (c) => `#${c.getHexString()}`;
 
 function lightStatus(cfg, s) {
-  if (!s.on) return 'Off';
-  return cfg.capabilities.includes('brightness') ? `${Math.round(s.brightness * 100)}%` : 'On';
+  if (!s.on) return t('Off');
+  return cfg.capabilities.includes('brightness') ? `${Math.round(s.brightness * 100)}%` : t('On');
 }
 
 function acTemperatureColor(target, cfg) {
@@ -257,7 +258,9 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
         el.style.setProperty('--c', MODE_COLORS[s.mode]);
         if (shownMode !== s.mode) { bubble.replaceChildren(icon(s.mode, 19)); shownMode = s.mode; }
         value.textContent = `${s.target}°`;
-        sub.textContent = `${!s.on ? 'Off' : s.idle ? 'Idle' : MODE_LABEL[s.mode]} · Room ${s.roomTemp.toFixed(isPhone ? 0 : 1)}°`;
+        sub.textContent = tf('{0} · Room {1}°',
+          !s.on ? t('Off') : s.idle ? t('Idle') : t(MODE_LABEL[s.mode]),
+          s.roomTemp.toFixed(isPhone ? 0 : 1));
       },
     };
   }
@@ -385,7 +388,7 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
       return {
         el,
         update() {
-          value.textContent = labels[s()[key]];
+          value.textContent = t(labels[s()[key]]);
           const ic = iconName || s().mode;
           if (shown !== ic) {
             const next = icon(ic, 24, 1.6);
@@ -398,7 +401,8 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
     };
 
     const mode = option('mode', 'Mode', MODE_LABEL, () => features().modes, null);
-    const fan = option('fan', isPhone ? 'Fan' : 'Fan speed', FAN_LABEL, () => features().fans, 'fan');
+    // "Fan" alone also names the AC's fan-only mode; the full label keeps them apart in every language.
+    const fan = option('fan', 'Fan speed', FAN_LABEL, () => features().fans, 'fan');
     const swing = option('swing', 'Airflow', SWING_LABEL, () => AC_SWINGS, 'wind');
     const sleepValue = h('div.option-value');
     const sleep = h('button.option', { onclick: () => { haptic('light'); set({ sleep: !s().sleep }); } },
@@ -424,14 +428,14 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
         eco.hidden = !f.eco;
         options.style.gridTemplateColumns = `repeat(${shown.filter(([, on]) => on).length || 1}, 1fr)`;
         powerBtn.classList.toggle('on', a.on);
-        sub.replaceChildren(icon('thermo', 14), 'Room ', h('b', `${a.roomTemp.toFixed(1)}°C`),
+        sub.replaceChildren(icon('thermo', 14), t('Room '), h('b', `${a.roomTemp.toFixed(1)}°C`),
           h('span.live', { style: { background: a.on ? MODE_COLORS[a.mode] : 'rgba(255,255,255,.25)', boxShadow: a.on && !a.idle ? `0 0 8px ${MODE_COLORS[a.mode]}` : 'none' } }));
         big.set(a.target, !a.on);
         slider.set(a.target);
         eco.classList.toggle('on', a.eco);
         mode.update(); fan.update(); swing.update();
         sleep.classList.toggle('active', a.sleep);
-        sleepValue.textContent = a.sleep ? 'On' : 'Off';
+        sleepValue.textContent = a.sleep ? t('On') : t('Off');
       },
     };
   }
@@ -484,14 +488,14 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
       update() {
         const l = s();
         powerBtn.classList.toggle('on', l.on);
-        sub.replaceChildren(roomName.get(cfg.room), ' · ', h('b', l.on ? 'On' : 'Off'));
+        sub.replaceChildren(roomName.get(cfg.room), ' · ', h('b', l.on ? t('On') : t('Off')));
         big.set(caps.includes('brightness') ? Math.round(l.brightness * 100) : l.on ? 100 : 0, !l.on);
         sliders.brightness?.set(Math.round(l.brightness * 100));
         sliders.temp?.set(l.temp);
         if (kelvinLabel) kelvinLabel.textContent = l.color ? '—' : `${l.temp} K`;
         swatches.forEach((el, i) => el.classList.toggle('selected', l.color?.toLowerCase() === SWATCHES[i]));
         pad?.set(l.color);
-        if (colorLabel) colorLabel.textContent = l.color ? l.color.toUpperCase() : 'White';
+        if (colorLabel) colorLabel.textContent = l.color ? l.color.toUpperCase() : t('White');
       },
     };
   }
@@ -513,7 +517,7 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
     } else {
       const cfg = store.acCfg.get(hit.id);
       const s = state.acs[hit.id];
-      name = cfg.name; status = s.on ? `${s.idle ? 'Idle' : MODE_LABEL[s.mode]} ${s.target}°` : 'Off'; on = s.on && !s.idle; color = MODE_COLORS[s.mode];
+      name = cfg.name; status = s.on ? `${s.idle ? t('Idle') : t(MODE_LABEL[s.mode])} ${s.target}°` : t('Off'); on = s.on && !s.idle; color = MODE_COLORS[s.mode];
     }
     tooltip.replaceChildren(h('i.dot'), name, h('span', status));
     tooltip.classList.toggle('on', on);
@@ -555,8 +559,8 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
 
     homeSub.replaceChildren(
       h('span.live', { style: anyOn ? {} : { background: 'rgba(255,255,255,.25)', boxShadow: 'none' } }),
-      h('b', onCount ? `${onCount} of ${lights.length}` : 'No'), ' lights on',
-      acsOn.length ? ` · AC ${acsOn[0].target}°` : '');
+      h('b', onCount ? tf('{0} of {1} lights on', onCount, lights.length) : t('No lights on')),
+      acsOn.length ? ` · ${t('AC')} ${acsOn[0].target}°` : '');
     power.classList.toggle('on', anyOn);
 
     for (const [id, b] of sceneButtons) b.classList.toggle('active', state.scene === id);
@@ -577,7 +581,8 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
 
     const scoped = config.lights.filter(inScope);
     const scopedOn = scoped.filter((l) => state.lights[l.id].on).length;
-    listTitle.replaceChildren(h('b', ui.room === 'all' ? 'Whole home' : roomName.get(ui.room)), ` · ${scopedOn} of ${scoped.length} on`);
+    listTitle.replaceChildren(h('b', ui.room === 'all' ? t('Whole home') : roomName.get(ui.room)),
+      tf(' · {0} of {1} on', scopedOn, scoped.length));
 
     for (const t of tiles.values()) t.update();
     sheetView?.update();
@@ -609,7 +614,7 @@ export function createPanel(root, config, store, { onFocus, onMenu }) {
     setAgentLive(live) { aiBadge.hidden = !live; },
     /** `ai`: something an AI assistant did (who, what), instead of an error. */
     toast(text, ai = null) {
-      toastEl.replaceChildren(...(ai ? [h('span.toast-ai', icon('sparkles', 13, 2.2), ai), h('span', text)] : [text]));
+      toastEl.replaceChildren(...(ai ? [h('span.toast-ai', icon('sparkles', 13, 2.2), ai), h('span', text)] : [t(text)]));
       toastEl.classList.toggle('ai', Boolean(ai));
       toastEl.classList.add('show');
       clearTimeout(toastEl.timer);

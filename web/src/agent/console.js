@@ -5,6 +5,7 @@
 import { h } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { isNative, post, incoming } from '../bridge.js';
+import { t as tr } from '../i18n.js';
 import './console.css';
 
 const CLIENT_COLORS = {
@@ -114,7 +115,7 @@ export function bootConsole(root) {
     const span = button.querySelector('span');
     if (!span) return;
     const before = span.textContent;
-    span.textContent = label;
+    span.textContent = tr(label);
     button.classList.add('done');
     setTimeout(() => { span.textContent = before; button.classList.remove('done'); }, 1400);
   }
@@ -229,7 +230,7 @@ export function bootConsole(root) {
       error: 'Stopped', setup: 'One-time setup',
     }[s] || s;
     pill.replaceChildren(h('i.dot'), h('span', label), ...(s === 'live' ? [h('span.pill-reach', status.reach === 'local' ? 'This Mac' : 'Internet')] : []));
-    primary.replaceChildren(...(s === 'live' ? [icon('stop', 15, 2.4), 'Stop AI Access'] : s === 'starting' ? [h('i.spinner'), 'Cancel'] : [icon('sparkles', 17, 2), 'Start AI Access']));
+    primary.replaceChildren(...(s === 'live' ? [icon('stop', 15, 2.4), tr('Stop AI Access')] : s === 'starting' ? [h('i.spinner'), tr('Cancel')] : [icon('sparkles', 17, 2), tr('Start AI Access')]));
     primary.classList.toggle('stop', s === 'live' || s === 'starting');
     reachSeg.set(status.reach);
     reachSeg.el.classList.toggle('locked', s === 'live' || s === 'starting');
