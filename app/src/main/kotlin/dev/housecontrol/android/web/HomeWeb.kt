@@ -240,6 +240,10 @@ class HomeWeb(context: Context, val mode: String = "panel") {
             val payload = boot?.invoke() ?: JSONObject()
             payload.put("mode", mode)
             payload.put("platform", "android")
+            // The web UI ships the same translations as the native resources. Telling it the
+            // app's language keeps both halves of the screen in step after a locale change.
+            val locales = appContext.resources.configuration.locales
+            payload.put("locale", if (locales.isEmpty) "en" else locales[0].toLanguageTag())
             val script = "<script>window.__HOUSE_BOOT__ = ${payload.toJsonText().replace("</", "<\\/")};${insetScript()}$ERROR_REPORTER</script>"
             return html.replaceFirst("<head>", "<head>$script")
         }

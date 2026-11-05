@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,7 +51,7 @@ fun Screen(
     title: String,
     onBack: (() -> Unit)? = null,
     onClose: (() -> Unit)? = null,
-    closeLabel: String = "Done",
+    closeLabel: String? = null,
     trailing: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -61,7 +62,7 @@ fun Screen(
                     Modifier.align(Alignment.CenterStart).clip(CircleShape).clickable(onClick = onBack).padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(painterResource(R.drawable.lucide_arrow_left), "Back", Modifier.size(22.dp), tint = Palette.text)
+                    Icon(painterResource(R.drawable.lucide_arrow_left), stringResource(R.string.cd_back), Modifier.size(22.dp), tint = Palette.text)
                 }
             }
             Text(
@@ -74,7 +75,7 @@ fun Screen(
                 trailing()
                 if (onClose != null) {
                     Text(
-                        closeLabel,
+                        closeLabel ?: stringResource(R.string.action_done),
                         Modifier.clip(CircleShape).clickable(onClick = onClose).padding(horizontal = 12.dp, vertical = 10.dp),
                         style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Palette.accent),
                     )
