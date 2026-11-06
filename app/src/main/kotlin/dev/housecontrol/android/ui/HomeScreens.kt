@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,23 +59,23 @@ fun WelcomeScreen(model: AppModel) {
         ) {
             Icon(painterResource(R.drawable.lucide_house), null, Modifier.size(36.dp), tint = Color(0xFFFFF2DB))
         }
-        Text("Welcome to House Control", Modifier.padding(top = 20.dp),
+        Text(stringResource(R.string.welcome_title), Modifier.padding(top = 20.dp),
             style = TextStyle(fontSize = 27.sp, fontWeight = FontWeight.Bold, color = Palette.text, textAlign = TextAlign.Center))
-        Text("Your home as a live 3D model, in your pocket.", Modifier.padding(top = 6.dp),
+        Text(stringResource(R.string.welcome_subtitle), Modifier.padding(top = 6.dp),
             style = TextStyle(fontSize = 16.sp, color = Palette.muted, textAlign = TextAlign.Center))
         Column(Modifier.padding(vertical = 34.dp), verticalArrangement = Arrangement.spacedBy(26.dp)) {
-            Feature(R.drawable.lucide_pointer, Palette.warm, "Tap a lamp, drag to dim",
-                "Lights, colours, air conditioners and scenes, right on the floor plan.")
-            Feature(R.drawable.lucide_pencil_ruler, Palette.accent, "Draw it here or on your computer",
-                "Rooms, lamps and ACs, on this phone. Pair a Mac or PC any time: both stay in sync.")
-            Feature(R.drawable.lucide_lightbulb, Palette.green, "Your real devices",
-                "Smart Life, Home Assistant and Philips Hue. Until you connect one, everything is simulated.")
+            Feature(R.drawable.lucide_pointer, Palette.warm, stringResource(R.string.welcome_feature_tap_title),
+                stringResource(R.string.welcome_feature_tap_detail))
+            Feature(R.drawable.lucide_pencil_ruler, Palette.accent, stringResource(R.string.welcome_feature_draw_title),
+                stringResource(R.string.welcome_feature_draw_detail))
+            Feature(R.drawable.lucide_lightbulb, Palette.green, stringResource(R.string.welcome_feature_devices_title),
+                stringResource(R.string.welcome_feature_devices_detail))
         }
-        PrimaryButton("Set up my home", icon = R.drawable.lucide_house) { model.finishWelcome(AppModel.WelcomeChoice.SetUpHere) }
+        PrimaryButton(stringResource(R.string.action_set_up_home), icon = R.drawable.lucide_house) { model.finishWelcome(AppModel.WelcomeChoice.SetUpHere) }
         Spacer(Modifier.size(10.dp))
-        SecondaryButton("Pair with Mac or PC", icon = R.drawable.lucide_laptop) { model.finishWelcome(AppModel.WelcomeChoice.Pair) }
+        SecondaryButton(stringResource(R.string.action_pair_mac), icon = R.drawable.lucide_laptop) { model.finishWelcome(AppModel.WelcomeChoice.Pair) }
         Spacer(Modifier.size(4.dp))
-        TextLink("Explore the demo home", color = Palette.muted) { model.finishWelcome(AppModel.WelcomeChoice.Demo) }
+        TextLink(stringResource(R.string.action_explore_demo), color = Palette.muted) { model.finishWelcome(AppModel.WelcomeChoice.Demo) }
     }
 }
 
@@ -93,22 +94,31 @@ private fun Feature(icon: Int, tint: Color, title: String, detail: String) {
 /** Starts the user's own home on this phone: a name and something to start drawing from. */
 @Composable
 fun NewHomeScreen(model: AppModel, close: () -> Unit) {
-    var name by remember { mutableStateOf("My home") }
+    val defaultName = stringResource(R.string.home_my_home)
+    var name by remember { mutableStateOf(defaultName) }
     var template by remember { mutableStateOf<String?>(null) }
     var confirm by remember { mutableStateOf<Confirmation?>(null) }
+    // Read in the composable scope: a button's callback is a plain lambda, where a resource
+    // cannot be looked up any more.
+    val replaceTitle = stringResource(R.string.confirm_replace_title, model.customPlanName ?: stringResource(R.string.newhome_home_lower))
+    // macName is a delegated property: a local can be smart cast, the property cannot.
+    val macName = model.macName
+    val replaceMessage = if (macName == null) stringResource(R.string.confirm_replace_message_no_mac)
+        else stringResource(R.string.confirm_replace_message_with_mac, macName)
+    val replaceAction = stringResource(R.string.action_replace)
     val templates = listOf(
-        Triple<String?, String, String>(null, "One room", "Draw the rest yourself, or add your devices to it"),
-        Triple("studio", "Studio layout", "3 rooms with furniture, to adapt"),
-        Triple("home", "Apartment layout", "5 rooms with furniture, to adapt"),
-        Triple("house", "House on two floors", "10 rooms and stairs, to adapt"),
+        Triple<String?, String, String>(null, stringResource(R.string.newhome_template_one_room), stringResource(R.string.newhome_template_one_room_detail)),
+        Triple("studio", stringResource(R.string.newhome_template_studio), stringResource(R.string.newhome_template_studio_detail)),
+        Triple("home", stringResource(R.string.newhome_template_apartment), stringResource(R.string.newhome_template_apartment_detail)),
+        Triple("house", stringResource(R.string.newhome_template_house), stringResource(R.string.newhome_template_house_detail)),
     )
     fun create() = model.createHome(name.trim(), template)
 
-    Screen("New home", onClose = close, closeLabel = "Cancel") {
-        Section("Name") {
-            Card(padding = 16.dp) { InputField("What do you call it?", name, { name = it }, "My home") }
+    Screen(stringResource(R.string.action_new_home), onClose = close, closeLabel = stringResource(R.string.action_cancel)) {
+        Section(stringResource(R.string.newhome_section_name)) {
+            Card(padding = 16.dp) { InputField(stringResource(R.string.newhome_name_label), name, { name = it }, stringResource(R.string.home_my_home)) }
         }
-        Section("Start from") {
+        Section(stringResource(R.string.newhome_section_start_from)) {
             Card {
                 templates.forEachIndexed { i, (id, title, detail) ->
                     if (i > 0) RowDivider()
@@ -123,14 +133,11 @@ fun NewHomeScreen(model: AppModel, close: () -> Unit) {
                     ) { Check(template == id) }
                 }
             }
-            Footnote("The editor opens next: drag rooms and lamps with a finger, pinch to zoom. Lamps and air conditioners stay simulated " +
-                "until you link them to your real devices.")
+            Footnote(stringResource(R.string.newhome_footnote))
         }
-        PrimaryButton("Create and edit", icon = R.drawable.lucide_pencil_ruler, enabled = name.isNotBlank()) {
+        PrimaryButton(stringResource(R.string.action_create_and_edit), icon = R.drawable.lucide_pencil_ruler, enabled = name.isNotBlank()) {
             if (model.hasCustomPlan) {
-                confirm = Confirmation("Replace ${model.customPlanName ?: "your home"}?",
-                    if (model.macName == null) "This phone keeps one home of your own. Export the current one from the editor first if you want to keep it."
-                    else "This phone keeps one home of your own, and ${model.macName} gets the new one too.", "Replace") { create() }
+                confirm = Confirmation(replaceTitle, replaceMessage, replaceAction) { create() }
             } else create()
         }
     }
@@ -141,12 +148,12 @@ fun NewHomeScreen(model: AppModel, close: () -> Unit) {
 @Composable
 fun ShortcutsScreen(model: AppModel, back: () -> Unit) {
     val quick = model.quickActions
-    Screen("App shortcuts", onBack = back) {
+    Screen(stringResource(R.string.shortcuts_title), onBack = back) {
         if (quick.options.isEmpty()) {
-            Footnote("Open the home once and its scenes and lamps appear here.")
+            Footnote(stringResource(R.string.shortcuts_empty_hint))
         }
         val active = quick.active.map { it.id }.toSet()
-        for ((title, prefix) in listOf("Scenes" to "scene:", "Lights" to "")) {
+        for ((title, prefix) in listOf(stringResource(R.string.section_scenes) to "scene:", stringResource(R.string.section_lights) to "")) {
             val list = quick.options.filter { if (prefix.isEmpty()) !it.id.startsWith("scene:") else it.id.startsWith(prefix) }
             if (list.isEmpty()) continue
             Section(title) {
@@ -158,7 +165,7 @@ fun ShortcutsScreen(model: AppModel, back: () -> Unit) {
                 }
             }
         }
-        Footnote("Up to four. Press and hold the House Control icon on the home screen to use them; drag one out to keep it on the home screen.")
+        Footnote(stringResource(R.string.shortcuts_limit_footnote))
     }
 }
 

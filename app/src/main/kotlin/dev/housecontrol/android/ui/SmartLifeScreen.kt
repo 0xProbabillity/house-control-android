@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -126,10 +127,10 @@ fun SmartLifeScreen(model: AppModel, back: () -> Unit, done: () -> Unit) {
             if (model.finishLogin(token, userCode)) return@LaunchedEffect
         }
         login = null
-        problem = "The code expired before it was scanned. Show a new one."
+        problem = context.getString(R.string.smartlife_code_expired)
     }
 
-    Screen("Smart Life", onBack = back) {
+    Screen(stringResource(R.string.service_smart_life), onBack = back) {
         val ticket = login
         when {
             model.smartLifeConnected -> Connected(model, done)
@@ -141,9 +142,8 @@ fun SmartLifeScreen(model: AppModel, back: () -> Unit, done: () -> Unit) {
                             IconBadge(R.drawable.lucide_laptop, Palette.green)
                             Spacer(Modifier.width(14.dp))
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("The code is on $mac", style = Type.title)
-                                Text("Switch to Smart Life on this phone, tap the scanner on its Home tab and point it at the computer's screen. " +
-                                    "The code stays there while you are away; come back here when you have confirmed.",
+                                Text(stringResource(R.string.smartlife_code_on_mac, mac), style = Type.title)
+                                Text(stringResource(R.string.smartlife_on_mac_detail),
                                     style = TextStyle(fontSize = 14.sp, color = Palette.muted, lineHeight = 19.sp))
                             }
                         }
@@ -151,36 +151,36 @@ fun SmartLifeScreen(model: AppModel, back: () -> Unit, done: () -> Unit) {
                 } else {
                     Card(padding = 16.dp) {
                         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                            Text("Scan it with Smart Life on this phone", style = Type.title)
-                            Step(1, "Save the code to the gallery (below).")
-                            Step(2, "In Smart Life tap **+** → **Scan**, then the **album** icon, and pick the code.")
-                            Step(3, "Confirm the login and come back here.")
-                            Text("Or show it on another screen: share it to a computer or tablet, or pair a Mac or PC and it appears there.",
+                            Text(stringResource(R.string.smartlife_scan_title), style = Type.title)
+                            Step(1, stringResource(R.string.smartlife_step_save))
+                            Step(2, stringResource(R.string.smartlife_step_scan))
+                            Step(3, stringResource(R.string.smartlife_step_confirm))
+                            Text(stringResource(R.string.smartlife_show_elsewhere),
                                 style = TextStyle(fontSize = 13.5.sp, color = Palette.faint, lineHeight = 18.sp))
                         }
                     }
                 }
                 val bitmap = remember(ticket.second) { QrCode.bitmap(ticket.second, 12).asImageBitmap() }
                 Box(Modifier.size(250.dp).clip(RoundedCornerShape(24.dp)).background(Color.White).padding(18.dp)) {
-                    Image(bitmap, "Smart Life sign-in code", Modifier.fillMaxWidth(), filterQuality = FilterQuality.None)
+                    Image(bitmap, stringResource(R.string.smartlife_code_label), Modifier.fillMaxWidth(), filterQuality = FilterQuality.None)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(Modifier.size(16.dp), color = Palette.muted, strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text("Waiting for you to confirm in Smart Life…", style = TextStyle(fontSize = 14.sp, color = Palette.muted))
+                    Text(stringResource(R.string.smartlife_waiting), style = TextStyle(fontSize = 14.sp, color = Palette.muted))
                 }
                 if (!onMac) {
-                    PrimaryButton(if (saved == true) "Saved to the gallery" else "Save code to the gallery",
+                    PrimaryButton(if (saved == true) stringResource(R.string.smartlife_saved) else stringResource(R.string.action_save_code),
                         icon = if (saved == true) R.drawable.lucide_circle_check else R.drawable.lucide_image_down) { save() }
-                    if (saved == false) Problem("House Control could not add the picture. Share the code instead.")
+                    if (saved == false) Problem(stringResource(R.string.smartlife_save_failed))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SecondaryButton("Share code", Modifier.weight(1f), R.drawable.lucide_share_2) { share(context, ticket.second) }
+                    SecondaryButton(stringResource(R.string.action_share_code), Modifier.weight(1f), R.drawable.lucide_share_2) { share(context, ticket.second) }
                     if (!onMac && model.macName != null) {
-                        SecondaryButton("Show on computer", Modifier.weight(1f), R.drawable.lucide_laptop) { onMac = model.showOnMac(ticket.second) }
+                        SecondaryButton(stringResource(R.string.action_show_on_computer), Modifier.weight(1f), R.drawable.lucide_laptop) { onMac = model.showOnMac(ticket.second) }
                     }
                 }
-                TextLink("Cancel", color = Palette.muted) {
+                TextLink(stringResource(R.string.action_cancel), color = Palette.muted) {
                     model.showOnMac(null)
                     login = null
                     saved = null
@@ -188,20 +188,19 @@ fun SmartLifeScreen(model: AppModel, back: () -> Unit, done: () -> Unit) {
             }
             else -> Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Card(padding = 16.dp) {
-                    InputField("User Code", userCode, { userCode = it }, "From the Smart Life app", monospace = true,
+                    InputField(stringResource(R.string.smartlife_user_code_label), userCode, { userCode = it }, stringResource(R.string.smartlife_user_code_placeholder), monospace = true,
                         imeAction = ImeAction.Go, onSubmit = { if (userCode.isNotBlank()) begin() })
                     if (model.suggestedUserCode.isNotEmpty() && userCode == model.suggestedUserCode) {
                         Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(painterResource(R.drawable.lucide_laptop), null, Modifier.size(15.dp), tint = Palette.muted)
                             Spacer(Modifier.width(6.dp))
-                            Text("Filled in from your computer", style = TextStyle(fontSize = 13.sp, color = Palette.muted))
+                            Text(stringResource(R.string.smartlife_filled_from_computer), style = TextStyle(fontSize = 13.sp, color = Palette.muted))
                         }
                     }
                 }
                 problem?.let { Problem(it) }
-                PrimaryButton("Show sign-in code", icon = R.drawable.lucide_qr_code, enabled = userCode.isNotBlank(), busy = busy) { begin() }
-                HelpCard("Where is the User Code?", "In the Smart Life (or Tuya Smart) app: **Me → Settings → Account and Security**, at the " +
-                    "bottom of the list. No Tuya developer account is needed.")
+                PrimaryButton(stringResource(R.string.action_show_signin_code), icon = R.drawable.lucide_qr_code, enabled = userCode.isNotBlank(), busy = busy) { begin() }
+                HelpCard(stringResource(R.string.smartlife_help_title), stringResource(R.string.smartlife_help_text))
             }
         }
     }
@@ -222,16 +221,16 @@ private fun Step(number: Int, text: String) {
 private fun Connected(model: AppModel, done: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(top = 50.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Icon(painterResource(R.drawable.lucide_shield_check), null, Modifier.size(72.dp), tint = Palette.green)
-        Text("Smart Life is connected", style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Palette.text))
+        Text(stringResource(R.string.smartlife_connected_title), style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Palette.text))
         Text(
             when (model.linkedDevices) {
-                0 -> "Now link the lamps and air conditioners of your plan to your devices: Settings → Devices, or in the editor."
-                1 -> "1 device in your floor plan is now the real thing."
-                else -> "${model.linkedDevices} devices in your floor plan are now the real thing."
+                0 -> stringResource(R.string.smartlife_connected_zero)
+                1 -> stringResource(R.string.smartlife_connected_one)
+                else -> stringResource(R.string.smartlife_connected_many, model.linkedDevices)
             },
             Modifier.padding(horizontal = 20.dp), style = TextStyle(fontSize = 15.sp, color = Palette.muted, textAlign = TextAlign.Center),
         )
-        PrimaryButton("Done", onClick = done)
+        PrimaryButton(stringResource(R.string.action_done), onClick = done)
     }
 }
 
@@ -239,7 +238,7 @@ private fun Connected(model: AppModel, done: () -> Unit) {
 private fun saveToGallery(context: Context, content: String): Boolean = runCatching {
     val png = QrCode.png(content, 16)
     val values = ContentValues().apply {
-        put(MediaStore.Images.Media.DISPLAY_NAME, "Smart Life sign-in code.png")
+        put(MediaStore.Images.Media.DISPLAY_NAME, context.getString(R.string.smartlife_code_label) + ".png")
         put(MediaStore.Images.Media.MIME_TYPE, "image/png")
         if (Build.VERSION.SDK_INT >= 29) put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/House Control")
     }
@@ -249,9 +248,9 @@ private fun saveToGallery(context: Context, content: String): Boolean = runCatch
 }.getOrDefault(false)
 
 private fun share(context: Context, content: String) {
-    val file = File(context.cacheDir, "shared/Smart Life sign-in code.png").apply { parentFile?.mkdirs() }
+    val file = File(context.cacheDir, "shared/" + context.getString(R.string.smartlife_code_label) + ".png").apply { parentFile?.mkdirs() }
     file.writeBytes(QrCode.png(content, 16))
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", file)
     val send = Intent(Intent.ACTION_SEND).setType("image/png").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    context.startActivity(Intent.createChooser(send, "Smart Life sign-in code"))
+    context.startActivity(Intent.createChooser(send, context.getString(R.string.smartlife_code_label)))
 }

@@ -10,6 +10,7 @@ import { h, clamp } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { isNative, isPhone, isAndroid, call, post, haptic, incoming } from '../bridge.js';
 import { createConnections } from './connections.js';
+import { t as tr, tf } from '../i18n.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 const sv = (tag, attrs = {}, ...kids) => {
@@ -154,7 +155,7 @@ export async function bootEditor(root) {
   }
 
   function toast(text, bad = false) {
-    toastEl.textContent = text;
+    toastEl.textContent = tr(text);
     toastEl.className = `toast show${bad ? ' bad' : ''}`;
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => { toastEl.className = 'toast'; }, 2600);
@@ -333,10 +334,10 @@ export async function bootEditor(root) {
     emptyCard.hidden = !empty;
     if (empty) {
       const under = below();
-      emptyCard.replaceChildren(h('b', `${levelName(level)} is empty`),
-        h('p', under ? `Copy the rooms of ${under.name}, or start with one room as big as it and divide it up.` : 'Add a room to start.'),
+      emptyCard.replaceChildren(h('b', tf('{0} is empty', levelName(level))),
+        h('p', under ? tf('Copy the rooms of {0}, or start with one room as big as it and divide it up.', under.name) : tr('Add a room to start.')),
         h('div.empty-actions',
-          under ? h('button.btn.primary', { onclick: () => copyRoomsFromBelow() }, icon('copy', 14, 2.2), `Copy ${under.name}`) : null,
+          under ? h('button.btn.primary', { onclick: () => copyRoomsFromBelow() }, icon('copy', 14, 2.2), tf('Copy {0}', under.name)) : null,
           h('button.btn', { onclick: () => fillLevel() }, icon('room', 14, 2.2), under ? 'One big room' : 'Add a room')));
     }
   }
@@ -433,9 +434,11 @@ export async function bootEditor(root) {
       valid = normalize(structuredClone(doc));
       const linked = [...doc.lights, ...doc.acs].filter(isLinked).length;
       status.className = 'status';
-      const floors = levelList().length > 1 ? `${levelList().length} floors · ` : '';
-      status.replaceChildren(h('span.ok', '●'), ` ${floors}${doc.rooms.length} rooms · ${doc.lights.length} lights · ${doc.acs.length} ACs · `,
-        `${linked} linked to real devices`, dirty ? h('span.dirty', ' · unsaved changes') : '');
+      const floors = levelList().length > 1 ? tf('{0} floors · ', levelList().length) : '';
+      status.replaceChildren(h('span.ok', '●'),
+        tf(' {0}{1} rooms · {2} lights · {3} ACs · ', floors, doc.rooms.length, doc.lights.length, doc.acs.length),
+        tf('{0} linked to real devices', linked),
+        dirty ? h('span.dirty', ' · unsaved changes') : '');
     } catch (e) {
       valid = null;
       status.className = 'status bad';
@@ -459,7 +462,7 @@ export async function bootEditor(root) {
   }
 
   function buildPreview() {
-    previewToggle.replaceChildren(icon(previewLights ? 'bright' : 'moon', 14), previewLights ? 'Lights on' : 'Lights off');
+    previewToggle.replaceChildren(icon(previewLights ? 'bright' : 'moon', 14), previewLights ? tr('Lights on') : tr('Lights off'));
     if (!valid) return;
     if (isPhone && !phone.show3D) { world?.dispose(); world = null; previewHost.replaceChildren(); return; }
     world?.dispose();
@@ -1152,9 +1155,9 @@ export async function bootEditor(root) {
       onclick: () => {
         if (b.dataset.armed) { run(); return; }
         b.dataset.armed = '1';
-        b.textContent = 'Tap again to remove';
+        b.textContent = tr('Tap again to remove');
         haptic('medium');
-        setTimeout(() => { delete b.dataset.armed; b.textContent = label; }, 3000);
+        setTimeout(() => { delete b.dataset.armed; b.textContent = tr(label); }, 3000);
       },
     }, label);
     return b;
@@ -1425,16 +1428,16 @@ export async function bootEditor(root) {
       const start = async () => {
         stopLoginPolling();
         message.className = 'note';
-        message.textContent = 'Requesting a login code…';
+        message.textContent = tr('Requesting a login code…');
         qrBox.replaceChildren();
         try {
           const userCode = codeInput.value.trim();
           const { token, qr } = await call('smartlife.begin', { userCode });
           qrBox.replaceChildren(h('img', { src: qr, alt: 'Smart Life login QR code', width: 220, height: 220 }));
-          message.textContent = 'Scan this code with the Smart Life app (the scan icon on the Home tab) and confirm the login. Waiting…';
+          message.textContent = tr('Scan this code with the Smart Life app (the scan icon on the Home tab) and confirm the login. Waiting…');
           let tries = 0;
           loginTimer = setInterval(async () => {
-            if (++tries > 90) { stopLoginPolling(); message.className = 'note bad'; message.textContent = 'The code expired. Press “Show QR code” again.'; return; }
+            if (++tries > 90) { stopLoginPolling(); message.className = 'note bad'; message.textContent = tr('The code expired. Press “Show QR code” again.'); return; }
             const r = await call('smartlife.poll', { token, userCode }).catch(() => null);
             if (!r?.connected) return;
             stopLoginPolling();
@@ -1851,7 +1854,7 @@ export async function bootEditor(root) {
         return h('div.p-head-actions', nodes);
       },
       refresh() {
-        doneBtn.textContent = dirty ? 'Save' : 'Done';
+        doneBtn.textContent = dirty ? tr('Save') : tr('Done');
         doneBtn.classList.toggle('primary', dirty);
         doneBtn.disabled = dirty && !valid;
         undoBtn.disabled = !undo.length;

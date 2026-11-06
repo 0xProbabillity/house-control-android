@@ -39,7 +39,7 @@ class QuickActions(private val context: Context) {
                 HomeAction(HomeAction.SCENE, scene.optString("id")))
         }
         if (snapshot.lights.isNotEmpty()) {
-            next += Option("allLights:off", "All lights off", R.drawable.lucide_power, HomeAction(HomeAction.ALL_LIGHTS, on = false))
+            next += Option("allLights:off", context.getString(R.string.quick_action_all_lights_off), R.drawable.lucide_power, HomeAction(HomeAction.ALL_LIGHTS, on = false))
         }
         for (light in snapshot.lights) {
             next += Option("light:${light.optString("id")}", light.optString("name"), lampIcon(light.optString("type")),

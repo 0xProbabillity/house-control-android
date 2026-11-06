@@ -6,6 +6,9 @@ what Android needs on top:
 
 - `src/bridge.js` talks to the app through `window.HouseAndroid` (a WebView JavaScript interface) and treats
   `platform: 'android'` as a phone.
+- `src/i18n.js` and `src/locales/` are the translation layer of the Android build: `t()` looks a label up in the
+  dictionary of the app's language and falls back to the English word, so upstream keeps writing its labels as plain
+  English. The app tells the page which language it runs in through `window.__HOUSE_BOOT__.locale`.
 - `src/main.js` and `src/editor/editor.js` answer Android's back button (`window.house.back()`).
 - `src/style.css` adds the side safe areas, the tablet layout and the layout on its side.
 - `vite.config.js` targets Chrome 100 as well as Safari 17.

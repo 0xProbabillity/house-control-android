@@ -258,7 +258,7 @@ class AppModel(private val context: Context) {
     fun importPlan(data: ByteArray) {
         val plan = PlanStore.validate(data)
         savePlan(plan)
-        show(Banner(Banner.Kind.Success, "Floor plan imported"))
+        show(Banner(Banner.Kind.Success, context.getString(R.string.banner_plan_imported)))
     }
 
     /** The plan the phone shows right now, as stored: the user's own, or a demo from the app. */
@@ -287,7 +287,7 @@ class AppModel(private val context: Context) {
         try {
             savePlan(plan)
         } catch (_: Exception) {
-            show(Banner(Banner.Kind.Error, "Could not create the home"))
+            show(Banner(Banner.Kind.Error, context.getString(R.string.banner_create_home_failed)))
             return
         }
         showSettings = false
@@ -470,7 +470,7 @@ class AppModel(private val context: Context) {
         try {
             savePlan(editor.plan)
         } catch (_: Exception) {
-            show(Banner(Banner.Kind.Error, "Could not save the floor plan"))
+            show(Banner(Banner.Kind.Error, context.getString(R.string.banner_save_plan_failed)))
         }
     }
 
@@ -519,7 +519,7 @@ class AppModel(private val context: Context) {
         prefs.edit().putBoolean("welcomed", true).apply()
         showWelcome = false
         web.haptic("success")
-        show(Banner(Banner.Kind.Sync, "Paired with ${pairing.name}"))
+        show(Banner(Banner.Kind.Sync, context.getString(R.string.banner_paired, pairing.name)))
         if (active) sync.start()
     }
 
@@ -585,8 +585,8 @@ class AppModel(private val context: Context) {
             remote.isEmpty() || remote == syncedRevision -> sync.sendPlan(localData) // only this phone changed it
             local == syncedRevision -> adopt(state)
             state.plan != null -> {
-                val theirs = runCatching { PlanStore.validate(state.plan).string("name") }.getOrNull() ?: "Home"
-                planChoice = PlanChoice(state.macName, theirs, plans.customPlanName ?: "Home", state.plan)
+                val theirs = runCatching { PlanStore.validate(state.plan).string("name") }.getOrNull() ?: context.getString(R.string.plan_default_name)
+                planChoice = PlanChoice(state.macName, theirs, plans.customPlanName ?: context.getString(R.string.plan_default_name), state.plan)
             }
         }
     }
@@ -601,7 +601,7 @@ class AppModel(private val context: Context) {
         try {
             plans.saveCustom(data, select = first || plans.activePlan == "custom")
         } catch (_: Exception) {
-            show(Banner(Banner.Kind.Error, "Could not save the floor plan"))
+            show(Banner(Banner.Kind.Error, context.getString(R.string.banner_save_plan_failed)))
             return
         }
         syncedRevision = PlanStore.revision(data)
@@ -609,7 +609,8 @@ class AppModel(private val context: Context) {
         editorWeb?.call("planArrived", plans.customPlan() ?: JSONObject(), state.macName)
         web.haptic("success")
         show(Banner(Banner.Kind.Sync,
-            if (first) "${plans.customPlanName ?: "Your home"} arrived from ${state.macName}" else "Updated from ${state.macName}"))
+            if (first) context.getString(R.string.banner_plan_arrived, plans.customPlanName ?: context.getString(R.string.home_your_home), state.macName)
+            else context.getString(R.string.banner_plan_updated, state.macName)))
     }
 
     /** The answer to a [PlanChoice]. */
@@ -618,11 +619,11 @@ class AppModel(private val context: Context) {
         planChoice = null
         if (keepPhone) {
             if (plans.customPlanFile.exists() && sync.sendPlan(plans.customPlanFile.readBytes())) {
-                show(Banner(Banner.Kind.Sync, "Sent to ${choice.macName}"))
+                show(Banner(Banner.Kind.Sync, context.getString(R.string.banner_plan_sent, choice.macName)))
             } else {
                 // Next time the Mac shows this plan unchanged, ours goes over.
                 syncedRevision = PlanStore.revision(choice.macPlan)
-                show(Banner(Banner.Kind.Warning, "${choice.macName} is not connected; it gets your plan next time"))
+                show(Banner(Banner.Kind.Warning, context.getString(R.string.banner_mac_offline, choice.macName)))
             }
         } else {
             adopt(SyncState(choice.macName, PlanStore.revision(choice.macPlan), choice.macPlan, suggestedUserCode, false))

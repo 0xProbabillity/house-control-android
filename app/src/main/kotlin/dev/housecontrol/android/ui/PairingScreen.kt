@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,7 +43,7 @@ fun PairingScreen(model: AppModel, back: () -> Unit) {
     fun take(link: String?) {
         val pairing = link?.let(SyncPairing::parse)
         if (pairing == null) {
-            problem = "That is not a House Control pairing code."
+            problem = context.getString(R.string.pairing_invalid_code)
             model.web.haptic("error")
             return
         }
@@ -51,37 +52,36 @@ fun PairingScreen(model: AppModel, back: () -> Unit) {
     }
     val scan = rememberLauncherForActivityResult(ScanContract()) { result -> result.contents?.let(::take) }
 
-    Screen("Pair with Mac or PC", onBack = back) {
+    Screen(stringResource(R.string.action_pair_mac), onBack = back) {
         val name = model.macName
         if (name != null) {
             Column(Modifier.fillMaxWidth().padding(top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Icon(painterResource(R.drawable.lucide_circle_check), null, Modifier.size(72.dp), tint = Palette.green)
-                Text("Paired with $name", style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Palette.text, textAlign = TextAlign.Center))
-                Text("Whenever both are on the same Wi-Fi and the app is open, a plan saved on one reaches the other a moment later.",
+                Text(stringResource(R.string.pairing_paired_with, name), style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Palette.text, textAlign = TextAlign.Center))
+                Text(stringResource(R.string.pairing_paired_detail),
                     Modifier.padding(horizontal = 16.dp), style = TextStyle(fontSize = 15.sp, color = Palette.muted, textAlign = TextAlign.Center))
-                PrimaryButton("Done", onClick = back)
+                PrimaryButton(stringResource(R.string.action_done), onClick = back)
             }
         } else {
             Card(padding = 16.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text("On the computer", style = Type.title)
-                    Numbered(1, "Click the house with the right mouse button — in the menu bar on a Mac, in the taskbar's tray on a PC — and choose **Pair Phone…** (**Pair iPhone…** in older versions). A code appears.")
-                    Numbered(2, "The first time, macOS or Windows asks whether House Control may use your local network: allow it.")
-                    Numbered(3, "Scan the code with this phone.")
+                    Text(stringResource(R.string.pairing_on_computer), style = Type.title)
+                    Numbered(1, stringResource(R.string.pairing_step_1))
+                    Numbered(2, stringResource(R.string.pairing_step_2))
+                    Numbered(3, stringResource(R.string.pairing_step_3))
                 }
             }
-            PrimaryButton("Scan the code", icon = R.drawable.lucide_scan_qr_code) {
-                scan.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("Point at the code on the computer")
+            PrimaryButton(stringResource(R.string.action_scan_code), icon = R.drawable.lucide_scan_qr_code) {
+                scan.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt(context.getString(R.string.pairing_scan_prompt))
                     .setBeepEnabled(false).setOrientationLocked(false))
             }
-            SecondaryButton("Paste pairing link", icon = R.drawable.lucide_clipboard_paste) {
+            SecondaryButton(stringResource(R.string.action_paste_link), icon = R.drawable.lucide_clipboard_paste) {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 take(clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString())
             }
             problem?.let { Problem(it) }
-            Footnote("Or press Copy Pairing Link on the computer, send it to this phone and paste it here. Nothing goes through a server: " +
-                "the two talk over your Wi-Fi with a key only the code carries.")
+            Footnote(stringResource(R.string.pairing_footnote))
         }
     }
 }

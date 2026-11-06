@@ -65,6 +65,28 @@
 | ✓ **Philips Hue** | The Hue Bridge's local API (CLIP v2): press its button once. Found on the Wi-Fi by itself |
 | — **Apple Home** | HomeKit exists only on Apple devices. Add HomeKit or Matter accessories to Home Assistant to switch them here |
 
+## Languages
+
+House Control speaks English and Simplified Chinese.
+
+The app follows the language of your phone. The native screens — **Settings**, **Devices**, the
+connections — read their text from Android's own resources, and the 3D home, the panel and the
+floor plan editor, which run in a WebView, read the same wording from a dictionary that travels
+with the app. English stays the default, and a label the dictionary does not know is shown as
+it is written.
+
+- **English** (default) — `app/src/main/res/values/strings.xml`, and the English words in the web UI.
+- **Simplified Chinese** — `app/src/main/res/values-zh-rCN/strings.xml` and `web/src/locales/zh-CN.js`.
+
+On Android 13 and later the app's language is also listed in **Settings → Apps → House Control →
+Language**; on earlier versions it follows the system language.
+
+[中文说明](README.zh-CN.md)
+
+Want a language of your own? Add a `values-xx/strings.xml` with the same names, add a dictionary
+in `web/src/locales/`, and list it in `app/src/main/res/xml/locales_config.xml`. Nothing else has
+to change.
+
 ## Install
 
 1. Download `house-control-<version>.apk` from [Releases](../../releases).

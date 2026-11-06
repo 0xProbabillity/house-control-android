@@ -11,6 +11,7 @@ import { icon } from '../ui/icons.js';
 import { lightColor } from '../three/lights.js';
 import { MODE_COLORS } from '../three/ac.js';
 import { post, incoming, isNative } from '../bridge.js';
+import { t as tr, tf } from '../i18n.js';
 
 const MODE_LABEL = { cool: 'Cool', heat: 'Heat', dry: 'Dry', fan: 'Fan', auto: 'Auto' };
 const NAVY = new THREE.Color('#17274f');
@@ -96,7 +97,9 @@ export async function bootIsland(root) {
       el.style.setProperty('--c', MODE_COLORS[s.mode]);
       if (shownMode !== s.mode) { bubble.replaceChildren(icon(s.mode, 15)); shownMode = s.mode; }
       value.textContent = `${s.target}°`;
-      sub.textContent = `${!s.on ? 'Off' : s.idle ? 'Idle' : MODE_LABEL[s.mode]} · ${s.roomTemp.toFixed(0)}° inside`;
+      sub.textContent = tf('{0} · {1}° inside',
+        !s.on ? tr('Off') : s.idle ? tr('Idle') : tr(MODE_LABEL[s.mode]),
+        s.roomTemp.toFixed(0));
     });
   }
 
@@ -145,8 +148,8 @@ export async function bootIsland(root) {
   }
 
   function lightLabel(cfg, s) {
-    if (!s.on) return 'Off';
-    return cfg.capabilities.includes('brightness') ? `${Math.round(s.brightness * 100)}%` : 'On';
+    if (!s.on) return tr('Off');
+    return cfg.capabilities.includes('brightness') ? `${Math.round(s.brightness * 100)}%` : tr('On');
   }
 
   function toggleEverything() {
@@ -223,7 +226,8 @@ export async function bootIsland(root) {
 
     status.replaceChildren(
       h('i.dot', { style: onCount || acOn ? {} : { background: 'rgba(255,255,255,.25)', boxShadow: 'none' } }),
-      h('b', onCount ? `${onCount} of ${lights.length}` : 'No'), ' lights on', acOn ? ` · ${acOn.target}°` : '');
+      h('b', onCount ? tf('{0} of {1} lights on', onCount, lights.length) : tr('No lights on')),
+      acOn ? ` · ${acOn.target}°` : '');
     power.classList.toggle('on', onCount > 0 || Boolean(acOn));
     for (const [id, b] of sceneButtons) b.classList.toggle('active', state.scene === id);
     for (const row of rows) row();
