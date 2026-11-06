@@ -56,6 +56,16 @@ fun SettingsScreen(model: AppModel, open: (Route) -> Unit, close: () -> Unit) {
         AboutSection()
     }
     confirm?.let { ConfirmDialog(it) { confirm = null } }
+    model.backupToRestore?.let { data ->
+        // The run holds the backup itself: the dialog dismisses before it runs.
+        ConfirmDialog(
+            Confirmation(
+                stringResource(R.string.backup_restore_title),
+                stringResource(R.string.backup_restore_message),
+                stringResource(R.string.backup_restore_action),
+            ) { model.restoreBackup(data) }
+        ) { model.cancelRestoreBackup() }
+    }
 }
 
 /** A question before something that cannot simply be undone. */
@@ -102,6 +112,12 @@ private fun HomeSection(model: AppModel, open: (Route) -> Unit) {
                 if (model.linkedDevices == 0) stringResource(R.string.settings_devices_link_prompt) else stringResource(R.string.settings_devices_linked_count, model.linkedDevices),
                 Palette.green) { open(Route.Devices) }
         }
+        Card {
+            LinkRow(R.drawable.lucide_download, stringResource(R.string.backup_export_title), stringResource(R.string.backup_export_detail)) { model.requestBackup() }
+            RowDivider()
+            LinkRow(R.drawable.lucide_share_2, stringResource(R.string.backup_share_action_title), stringResource(R.string.backup_share_action_detail)) { model.requestBackupShare() }
+        }
+        Footnote(stringResource(R.string.backup_footnote))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             SecondaryButton(stringResource(R.string.action_new_home), Modifier.weight(1f), R.drawable.lucide_plus) { model.showNewHome = true }
             SecondaryButton(stringResource(R.string.action_import_file), Modifier.weight(1f), R.drawable.lucide_download) { model.requestImport() }

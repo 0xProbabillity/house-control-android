@@ -261,4 +261,17 @@
     <string name="banner_plan_updated">Updated from %1$s</string>
     <string name="banner_plan_sent">Sent to %1$s</string>
     <string name="banner_mac_offline">%1$s is not connected; it gets your plan next time</string>
+    <!-- Backup -->
+    <string name="backup_export_title">Export backup</string>
+    <string name="backup_export_detail">The floor plan and this phone\'s settings, in one file</string>
+    <string name="backup_share_action_title">Share backup</string>
+    <string name="backup_share_action_detail">Hand the backup to another app</string>
+    <string name="backup_footnote">A backup holds no passwords: the Home Assistant token, the Hue key and the Smart Life session stay on this phone.</string>
+    <string name="backup_restore_title">Restore this backup?</string>
+    <string name="backup_restore_message">It replaces the floor plan and the app shortcuts on this phone.</string>
+    <string name="backup_restore_action">Restore</string>
+    <string name="error_backup_not_a_plan">This is a backup, not a floor plan.</string>
+    <string name="banner_backup_saved">Backup saved to the downloads folder</string>
+    <string name="banner_backup_failed">Could not save the backup</string>
+    <string name="banner_backup_restored">Backup restored</string>
 </resources>

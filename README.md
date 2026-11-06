@@ -128,6 +128,8 @@ Everything is set up on the phone, in **Settings** (the sliders button at the to
 - **Devices** lists every lamp and AC of the plan by room; tap one and pick its real device from everything your
   connected platforms have, or **Add devices to a room** to put several in at once, already linked.
 - **Smart Life**, **Home Assistant** and **Philips Hue** connect right there.
+- **Export backup** writes the floor plan and this phone's own settings into one file: into the
+  downloads folder, or shared to another app. **Import file** takes it back.
 
 ### Smart Life
 
@@ -195,6 +197,8 @@ Bridge — to your paired Mac or PC, and to nothing else. There is no account, n
 - The Smart Life session, the Home Assistant token, the Hue key and the computer's pairing key are encrypted with AES-GCM
   under a non-exportable Android Keystore key, and are left out of backups. **Sign out** / **Disconnect** /
   **Unpair** delete them. No log contains a token or a key.
+- A **backup** holds the floor plan and the app's own settings, and no passwords: the Home
+  Assistant token, the Hue key and the Smart Life session are never written into one.
 - The Hue Bridge's certificate is self-signed: the phone trusts it when pairing, remembers its SHA-256 fingerprint
   and refuses any other device at that address afterwards.
 - Home Assistant is usually reached over plain `http://` on the home network, so the app allows cleartext traffic;

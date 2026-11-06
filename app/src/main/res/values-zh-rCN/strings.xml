@@ -251,6 +251,16 @@
     <string name="widget_switch_on">开</string>
     <string name="widget_brightness">%1$d%%</string>
     <string name="quick_action_all_lights_off">关闭所有灯光</string>
+    <!-- Backup -->
+    <string name="backup_export_title">导出备份</string>
+    <string name="backup_export_detail">户型图与本机设置，合成一个文件</string>
+    <string name="backup_share_action_title">分享备份</string>
+    <string name="backup_share_action_detail">把备份交给其他应用</string>
+    <string name="backup_footnote">备份不含任何密码：Home Assistant 令牌、Hue 密钥与 Smart Life 会话只留在这台手机上。</string>
+    <string name="backup_restore_title">恢复这个备份？</string>
+    <string name="backup_restore_message">它会替换这台手机上的户型图与应用快捷方式。</string>
+    <string name="backup_restore_action">恢复</string>
+    <string name="error_backup_not_a_plan">这是一个备份文件，不是户型图。</string>
     <!-- Banners and toasts (AppModel) -->
     <string name="banner_plan_imported">户型图已导入</string>
     <string name="banner_create_home_failed">无法创建家</string>
@@ -261,4 +271,7 @@
     <string name="banner_plan_updated">已从 %1$s 更新</string>
     <string name="banner_plan_sent">已发送到 %1$s</string>
     <string name="banner_mac_offline">%1$s 未连接，下次会收到你的户型图</string>
+    <string name="banner_backup_saved">备份已保存到下载目录</string>
+    <string name="banner_backup_failed">无法保存备份</string>
+    <string name="banner_backup_restored">备份已恢复</string>
 </resources>

@@ -1,5 +1,11 @@
 package dev.housecontrol.android.ui
 
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -52,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.FileProvider
 import dev.housecontrol.android.AppModel
 import dev.housecontrol.android.Banner
 import dev.housecontrol.android.FileRequest
@@ -59,6 +66,7 @@ import dev.housecontrol.android.R
 import dev.housecontrol.android.Route
 import dev.housecontrol.android.core.readable
 import dev.housecontrol.android.web.HomeWeb
+import java.io.File
 
 /** The 3D home full screen, and the native screens that come up over it. */
 @Composable
@@ -205,13 +213,62 @@ private fun FileRequests(model: AppModel) {
             runCatching { context.contentResolver.openOutputStream(uri)?.use { it.write(request.data) } }.isSuccess
         model.fileExported(ok)
     }
+    // Android before 10 cannot write into the downloads folder on its own, so the person
+    // picks where the backup goes.
+    val backup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        val request = model.fileRequest as? FileRequest.SaveBackup
+        val ok = uri != null && request != null &&
+            runCatching { context.contentResolver.openOutputStream(uri)?.use { it.write(request.data) } }.isSuccess
+        model.backupSaved(ok)
+    }
     LaunchedEffect(model.fileRequest) {
         when (val request = model.fileRequest) {
             FileRequest.Import -> import.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
             is FileRequest.Export -> export.launch("${request.name}.json")
+            is FileRequest.SaveBackup -> when {
+                request.share -> {
+                    shareBackup(context, request.name, request.data)
+                    model.backupSaved(true)
+                }
+                Build.VERSION.SDK_INT >= 29 -> model.backupSaved(saveToDownloads(context, request.name, request.data))
+                else -> backup.launch("${request.name}.json")
+            }
             null -> {}
         }
     }
+}
+
+/** Writes the backup into the downloads folder, where the file manager finds it. */
+private fun saveToDownloads(context: Context, name: String, data: ByteArray): Boolean {
+    val values = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.json")
+        put(MediaStore.MediaColumns.MIME_TYPE, "application/json")
+        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/House Control")
+        put(MediaStore.MediaColumns.IS_PENDING, 1)
+    }
+    val uri = context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
+    val ok = runCatching {
+        context.contentResolver.openOutputStream(uri)?.use { it.write(data) } != null
+    }.getOrDefault(false)
+    if (!ok) {
+        context.contentResolver.delete(uri, null, null)
+        return false
+    }
+    values.clear()
+    values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+    context.contentResolver.update(uri, values, null, null)
+    return true
+}
+
+/** Hands the backup to another app. */
+private fun shareBackup(context: Context, name: String, data: ByteArray) {
+    val file = File(context.cacheDir, "shared/$name.json").apply { parentFile?.mkdirs() }
+    file.writeBytes(data)
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", file)
+    val send = Intent(Intent.ACTION_SEND).setType("application/json")
+        .putExtra(Intent.EXTRA_STREAM, uri)
+        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    context.startActivity(Intent.createChooser(send, context.getString(R.string.backup_share_action_title)))
 }
 
 @Composable

@@ -121,6 +121,8 @@ apksigner verify --print-certs house-control-1.0.0.apk
 - **Devices** 按房间列出户型图里的每一盏灯和每一台空调；点其中一个，再从你已连接平台的所有设备里挑出对应的
   那台真实设备；也可以用 **Add devices to a room** 一次放入多个，并直接建立好链接。
 - **Smart Life**、**Home Assistant** 和 **Philips Hue** 都在这里直接连接。
+- **Export backup** 把户型图和这台手机自己的设置写成一个文件：存到下载目录，或分享给其他应用。
+  **Import file** 再把它读回来。
 
 ### Smart Life
 
@@ -186,6 +188,8 @@ Bridge —— 以及你配对过的 Mac 或 PC，此外哪儿都不去。它没�
 - Smart Life 会话、Home Assistant 令牌、Hue 密钥和电脑的配对密钥都用 AES-GCM
   加密，密钥保存在不可导出的 Android Keystore 密钥下，并且不进入备份。**Sign out** / **Disconnect** /
   **Unpair** 会把它们删掉。任何日志里都不会出现令牌或密钥。
+- **备份**里只有户型图和应用自己的设置，没有密码：Home Assistant 令牌、Hue 密钥和 Smart Life
+  会话都不会被写进去。
 - Hue Bridge 的证书是自签名的：手机在配对时信任它，记下它的 SHA-256 指纹，此后拒绝该地址上的任何其他设备。
 - Home Assistant 在家庭网络上通常是通过明文 `http://` 访问的，所以应用允许明文流量；
   如果服务器要走公网，请使用 `https://`。

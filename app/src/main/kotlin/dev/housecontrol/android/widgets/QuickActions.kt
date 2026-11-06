@@ -49,6 +49,16 @@ class QuickActions(private val context: Context) {
         publish()
     }
 
+    /** The ids the person chose, in order, for a backup. */
+    val chosenIds: List<String> get() = chosen ?: emptyList()
+
+    /** Takes the ids back from a backup. */
+    fun restore(ids: List<String>) {
+        chosen = ids.ifEmpty { null }
+        prefs.edit().putString("chosen", ids.joinToString(",")).apply()
+        publish()
+    }
+
     /** What the menu shows: the chosen ones that still exist, or the first scenes. */
     val active: List<Option>
         get() {

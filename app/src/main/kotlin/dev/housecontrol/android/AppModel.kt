@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dev.housecontrol.android.core.Backup
 import dev.housecontrol.android.core.DeviceHub
 import dev.housecontrol.android.core.HomeAction
 import dev.housecontrol.android.core.HueService
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.time.LocalDate
 
 /** A short message that slides in under the status bar. */
 data class Banner(val kind: Kind, val text: String, val id: Long = System.nanoTime()) {
@@ -62,6 +64,8 @@ data class PlanChoice(val macName: String, val macPlanName: String, val phonePla
 sealed class FileRequest {
     data object Import : FileRequest()
     data class Export(val data: ByteArray, val name: String) : FileRequest()
+    /** A backup of this phone's own settings: written to the downloads folder, or handed to another app. */
+    data class SaveBackup(val data: ByteArray, val name: String, val share: Boolean) : FileRequest()
 }
 
 /**
@@ -363,6 +367,45 @@ class AppModel(private val context: Context) {
         fileRequest = FileRequest.Import
     }
 
+    /** The backup this phone would hand over: the floor plan, the plan shown and the shortcuts. */
+    private fun backup(share: Boolean): FileRequest.SaveBackup {
+        val data = Backup.encode(currentPlan, plans.activePlan, quickActions.chosenIds)
+        return FileRequest.SaveBackup(data, "house-control-backup-${LocalDate.now()}", share)
+    }
+
+    /** Settings → Export backup: a file in the downloads folder. */
+    fun requestBackup() {
+        editorPending = null
+        fileRequest = backup(share = false)
+    }
+
+    /** Settings → Share backup: the same file, handed to another app. */
+    fun requestBackupShare() {
+        editorPending = null
+        fileRequest = backup(share = true)
+    }
+
+    /** Takes a backup back: the floor plan, the plan shown and the shortcuts. */
+    fun restoreBackup(data: ByteArray) {
+        val contents = Backup.decode(data)
+        contents.plan?.let {
+            PlanStore.validate(PlanStore.encode(it))
+            plans.saveCustom(it)
+        }
+        plans.select(contents.selectedPlan)
+        quickActions.restore(contents.shortcuts)
+        reloadHome()
+        show(Banner(Banner.Kind.Success, context.getString(R.string.banner_backup_restored)))
+    }
+
+    /** A backup picked for restoring: it waits for the person to say yes. */
+    var backupToRestore by mutableStateOf<ByteArray?>(null); private set
+
+    /** Says no to the backup that was waiting. */
+    fun cancelRestoreBackup() {
+        backupToRestore = null
+    }
+
     /** The file picked for the editor's "Import…" (null: cancelled), or a plan picked in Settings. */
     fun fileImported(data: ByteArray?) {
         fileRequest = null
@@ -370,13 +413,27 @@ class AppModel(private val context: Context) {
         val editor = editorWeb
         editorPending = null
         if (message == null || editor == null) {
-            if (data != null) importPlan(data)
+            if (data != null) importPicked(data)
             return
         }
         if (data == null) { editor.reply(message, jsonOf("cancelled" to true)); return }
+        if (Backup.isBackup(data)) {
+            editor.reply(message, jsonOf("error" to context.getString(R.string.error_backup_not_a_plan)))
+            return
+        }
         val json = runCatching { JSONObject(String(data, Charsets.UTF_8)) }.getOrNull()
         if (json == null) editor.reply(message, jsonOf("error" to "This file is not a floor plan."))
         else editor.reply(message, jsonOf("config" to json))
+    }
+
+    /** A file picked in Settings: a backup to take back, or a floor plan to use. */
+    private fun importPicked(data: ByteArray) {
+        if (Backup.isBackup(data)) {
+            // It replaces the plan and the shortcuts, so it asks first.
+            backupToRestore = data
+            return
+        }
+        importPlan(data)
     }
 
     fun fileExported(ok: Boolean) {
@@ -384,6 +441,13 @@ class AppModel(private val context: Context) {
         val message = editorPending ?: return
         editorPending = null
         editorWeb?.reply(message, if (ok) jsonOf("ok" to true) else jsonOf("cancelled" to true))
+    }
+
+    /** The backup went to the downloads folder, or to another app. */
+    fun backupSaved(ok: Boolean) {
+        fileRequest = null
+        show(Banner(if (ok) Banner.Kind.Success else Banner.Kind.Error,
+            context.getString(if (ok) R.string.banner_backup_saved else R.string.banner_backup_failed)))
     }
 
     /** A connection screen opened from the editor was closed: the editor's lists follow. */
