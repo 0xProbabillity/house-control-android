@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **Chinese.** House Control now speaks Simplified Chinese: the native screens, the widgets and
+  the bundled web UI (the 3D home, the panel and the floor plan editor). The app follows the
+  phone's language, and on Android 13 and later it is listed in Settings → Apps → House Control
+  → Language. English is unchanged.
+- **Backups.** Settings can now write the floor plan and this phone's own settings into one file —
+  into the downloads folder, or shared to another app — and take it back. A backup holds no
+  passwords: the Home Assistant token, the Hue key and the Smart Life session stay where they are.
+
 ## 1.2.0
 
 - **Turn the home all the way round** with one finger, and tilt it from nearly level with the floor to straight down.

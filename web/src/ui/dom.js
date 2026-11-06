@@ -1,4 +1,9 @@
 import { haptic } from '../bridge.js';
+import { t } from '../i18n.js';
+
+// Attributes a person reads — a tooltip, a screen-reader label, an input hint — are
+// translated like text nodes. Everything else (classes, styles, ids) is left alone.
+const READABLE_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 
 // Minimal hyperscript helper: h('div.class', { onclick, style, ... }, ...children)
 export function h(spec, props, ...children) {
@@ -14,11 +19,11 @@ export function h(spec, props, ...children) {
     if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
     else if (k === 'style') Object.assign(el.style, v);
     else if (k === 'vars') for (const [name, val] of Object.entries(v)) el.style.setProperty(name, val);
-    else el.setAttribute(k, v === true ? '' : v);
+    else el.setAttribute(k, v === true ? '' : READABLE_ATTRIBUTES.has(k) ? t(String(v)) : v);
   }
   for (const c of children.flat(Infinity)) {
     if (c == null || c === false) continue;
-    el.append(c instanceof Node ? c : document.createTextNode(String(c)));
+    el.append(c instanceof Node ? c : document.createTextNode(t(String(c))));
   }
   return el;
 }

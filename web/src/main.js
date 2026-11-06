@@ -7,6 +7,7 @@ import { h, openMenu } from './ui/dom.js';
 import { icon } from './ui/icons.js';
 import { isNative, isPhone, isAndroid, post, incoming, haptic } from './bridge.js';
 import { publishWidgets, runWidgetAction } from './widgets.js';
+import { applyDocumentLanguage } from './i18n.js';
 
 const DEMO_PLANS = [
   { id: 'home', name: 'Demo · Apartment' },
@@ -16,6 +17,7 @@ const DEMO_PLANS = [
 const STAGE_INSETS = [62, 50]; // header above, panel overlap below
 
 const app = document.getElementById('app');
+applyDocumentLanguage();
 if (isNative) document.documentElement.classList.add('native');
 if (isPhone) document.documentElement.classList.add('ios');
 if (isAndroid) document.documentElement.classList.add('android');

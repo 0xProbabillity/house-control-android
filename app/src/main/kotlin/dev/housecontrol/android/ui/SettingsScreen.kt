@@ -1,5 +1,6 @@
 package dev.housecontrol.android.ui
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.format.DateUtils
@@ -21,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,7 +47,7 @@ object About {
 @Composable
 fun SettingsScreen(model: AppModel, open: (Route) -> Unit, close: () -> Unit) {
     var confirm by remember { mutableStateOf<Confirmation?>(null) }
-    Screen("Settings", onClose = close) {
+    Screen(stringResource(R.string.settings_title), onClose = close) {
         HomeSection(model, open)
         ShortcutsSection(model, open)
         MacSection(model, open) { confirm = it }
@@ -54,6 +56,16 @@ fun SettingsScreen(model: AppModel, open: (Route) -> Unit, close: () -> Unit) {
         AboutSection()
     }
     confirm?.let { ConfirmDialog(it) { confirm = null } }
+    model.backupToRestore?.let { data ->
+        // The run holds the backup itself: the dialog dismisses before it runs.
+        ConfirmDialog(
+            Confirmation(
+                stringResource(R.string.backup_restore_title),
+                stringResource(R.string.backup_restore_message),
+                stringResource(R.string.backup_restore_action),
+            ) { model.restoreBackup(data) }
+        ) { model.cancelRestoreBackup() }
+    }
 }
 
 /** A question before something that cannot simply be undone. */
@@ -69,43 +81,49 @@ fun ConfirmDialog(confirmation: Confirmation, dismiss: () -> Unit) {
         confirmButton = {
             TextButton({ dismiss(); confirmation.run() }) { Text(confirmation.action, color = Palette.red) }
         },
-        dismissButton = { TextButton(dismiss) { Text("Cancel", color = Palette.accent) } },
+        dismissButton = { TextButton(dismiss) { Text(stringResource(R.string.action_cancel), color = Palette.accent) } },
     )
 }
 
 @Composable
 private fun HomeSection(model: AppModel, open: (Route) -> Unit) {
-    Section("Home") {
+    Section(stringResource(R.string.settings_section_home)) {
         Card {
             if (model.hasCustomPlan) {
                 val devices = when (model.linkedDevices) {
-                    0 -> "No real devices linked"
-                    1 -> "1 real device linked"
-                    else -> "${model.linkedDevices} real devices linked"
+                    0 -> stringResource(R.string.home_devices_linked_zero)
+                    1 -> stringResource(R.string.home_devices_linked_one)
+                    else -> stringResource(R.string.home_devices_linked_many, model.linkedDevices)
                 }
-                PlanRow(model, "custom", model.customPlanName ?: "My home", if (model.activePlan == "custom") devices else "Your home",
+                PlanRow(model, "custom", model.customPlanName ?: stringResource(R.string.home_my_home), if (model.activePlan == "custom") devices else stringResource(R.string.home_your_home),
                     R.drawable.lucide_house, Palette.warm)
                 RowDivider()
             }
-            PlanRow(model, "home", "Apartment", "Demo · 5 rooms, simulated devices", R.drawable.lucide_building_2, Palette.accent)
+            PlanRow(model, "home", stringResource(R.string.home_plan_apartment), stringResource(R.string.home_plan_apartment_detail), R.drawable.lucide_building_2, Palette.accent)
             RowDivider()
-            PlanRow(model, "studio", "Studio", "Demo · 3 rooms, simulated devices", R.drawable.lucide_layout_grid, Palette.accent)
+            PlanRow(model, "studio", stringResource(R.string.home_plan_studio), stringResource(R.string.home_plan_studio_detail), R.drawable.lucide_layout_grid, Palette.accent)
             RowDivider()
-            PlanRow(model, "house", "House", "Demo · 2 floors, 10 rooms, simulated devices", R.drawable.lucide_house, Palette.accent)
+            PlanRow(model, "house", stringResource(R.string.home_plan_house), stringResource(R.string.home_plan_house_detail), R.drawable.lucide_house, Palette.accent)
         }
         Card {
-            LinkRow(R.drawable.lucide_pencil_ruler, "Edit floor plan", "Rooms, lamps, air conditioners, furniture") { model.openEditor() }
+            LinkRow(R.drawable.lucide_pencil_ruler, stringResource(R.string.settings_edit_floor_plan), stringResource(R.string.settings_edit_floor_plan_detail)) { model.openEditor() }
             RowDivider()
-            LinkRow(R.drawable.lucide_link_2, "Devices",
-                if (model.linkedDevices == 0) "Link the plan to your real devices" else "${model.linkedDevices} linked to real devices",
+            LinkRow(R.drawable.lucide_link_2, stringResource(R.string.devices_title),
+                if (model.linkedDevices == 0) stringResource(R.string.settings_devices_link_prompt) else stringResource(R.string.settings_devices_linked_count, model.linkedDevices),
                 Palette.green) { open(Route.Devices) }
         }
+        Card {
+            LinkRow(R.drawable.lucide_download, stringResource(R.string.backup_export_title), stringResource(R.string.backup_export_detail)) { model.requestBackup() }
+            RowDivider()
+            LinkRow(R.drawable.lucide_share_2, stringResource(R.string.backup_share_action_title), stringResource(R.string.backup_share_action_detail)) { model.requestBackupShare() }
+        }
+        Footnote(stringResource(R.string.backup_footnote))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            SecondaryButton("New home", Modifier.weight(1f), R.drawable.lucide_plus) { model.showNewHome = true }
-            SecondaryButton("Import file", Modifier.weight(1f), R.drawable.lucide_download) { model.requestImport() }
+            SecondaryButton(stringResource(R.string.action_new_home), Modifier.weight(1f), R.drawable.lucide_plus) { model.showNewHome = true }
+            SecondaryButton(stringResource(R.string.action_import_file), Modifier.weight(1f), R.drawable.lucide_download) { model.requestImport() }
         }
         if (!model.hasCustomPlan) {
-            Footnote("Make your own home here, or pair with House Control on a Mac or PC and the one drawn there arrives by itself.")
+            Footnote(stringResource(R.string.home_footnote))
         }
     }
 }
@@ -117,51 +135,55 @@ private fun PlanRow(model: AppModel, id: String, name: String, detail: String, i
 
 @Composable
 private fun ShortcutsSection(model: AppModel, open: (Route) -> Unit) {
-    Section("Shortcuts") {
+    Section(stringResource(R.string.settings_section_shortcuts)) {
         Card {
-            val names = model.quickActions.active.joinToString(" · ") { it.title }.ifEmpty { "None" }
-            LinkRow(R.drawable.lucide_pointer, "App shortcuts", names, Palette.warm) { open(Route.Shortcuts) }
+            val names = model.quickActions.active.joinToString(" · ") { it.title }.ifEmpty { stringResource(R.string.shortcuts_none) }
+            LinkRow(R.drawable.lucide_pointer, stringResource(R.string.shortcuts_title), names, Palette.warm) { open(Route.Shortcuts) }
         }
-        Footnote("Press and hold the app icon for these. Widgets — your home from above, scenes, lights — and the All lights tile " +
-            "are added from the home screen and Quick Settings.")
+        Footnote(stringResource(R.string.shortcuts_footnote))
     }
 }
 
 @Composable
 private fun MacSection(model: AppModel, open: (Route) -> Unit, confirm: (Confirmation) -> Unit) {
-    Section("Mac or PC") {
+    val context = LocalContext.current
+    Section(stringResource(R.string.settings_section_mac)) {
         val name = model.macName
         if (name != null) {
+            // Read in the composable scope: a button's callback is a plain lambda, where a
+            // resource cannot be looked up any more.
+            val unpairTitle = stringResource(R.string.confirm_unpair_title, name)
+            val unpairMessage = stringResource(R.string.confirm_unpair_message)
+            val unpairAction = stringResource(R.string.action_unpair)
             val status = model.syncStatus
             Card {
-                ListRow(R.drawable.lucide_laptop, name, syncText(model), Palette.accent, status = syncColor(status))
+                ListRow(R.drawable.lucide_laptop, name, syncText(context, model), Palette.accent, status = syncColor(status))
                 if (status is SyncClient.Status.Failed) {
                     RowDivider()
                     Text(status.reason, Modifier.fillMaxWidth().padding(14.dp), style = TextStyle(fontSize = 13.5.sp, color = Palette.red))
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                SecondaryButton("Sync now", Modifier.weight(1f), R.drawable.lucide_refresh_cw) { model.syncNow() }
-                SecondaryButton("Unpair", Modifier.width(120.dp), tint = Palette.red) {
-                    confirm(Confirmation("Unpair from $name?", "The floor plan stays on this phone but no longer follows the computer.", "Unpair") {
+                SecondaryButton(stringResource(R.string.action_sync_now), Modifier.weight(1f), R.drawable.lucide_refresh_cw) { model.syncNow() }
+                SecondaryButton(stringResource(R.string.action_unpair), Modifier.width(120.dp), tint = Palette.red) {
+                    confirm(Confirmation(unpairTitle, unpairMessage, unpairAction) {
                         model.unpair()
                     })
                 }
             }
-            Footnote("Changes saved on either one reach the other while both are on the same Wi-Fi: the floor plan, device links, Home Assistant and Hue.")
+            Footnote(stringResource(R.string.mac_footnote_synced))
         } else {
             Card(padding = 16.dp) {
                 Row(verticalAlignment = Alignment.Top) {
                     IconBadge(R.drawable.lucide_laptop, Palette.accent)
                     Spacer(Modifier.width(14.dp))
                     androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("Optional: a Mac or PC", style = Type.title)
-                        Text("Pair with House Control on a Mac or PC and your home — rooms, lamps, device links, connections — stays the same on both, " +
-                            "whichever one you edit.", style = TextStyle(fontSize = 14.sp, color = Palette.muted, lineHeight = 19.sp))
+                        Text(stringResource(R.string.mac_optional_title), style = Type.title)
+                        Text(stringResource(R.string.mac_optional_detail), style = TextStyle(fontSize = 14.sp, color = Palette.muted, lineHeight = 19.sp))
                     }
                 }
             }
-            PrimaryButton("Pair with Mac or PC", icon = R.drawable.lucide_scan_qr_code) { open(Route.Pairing) }
+            PrimaryButton(stringResource(R.string.action_pair_mac), icon = R.drawable.lucide_scan_qr_code) { open(Route.Pairing) }
         }
     }
 }
@@ -172,28 +194,33 @@ private fun syncColor(status: SyncClient.Status) = when (status) {
     else -> Palette.warm
 }
 
-private fun syncText(model: AppModel): String = when (model.syncStatus) {
-    SyncClient.Status.Connected -> "Connected · up to date"
-    SyncClient.Status.Connecting -> "Connecting…"
-    is SyncClient.Status.Failed -> "Not syncing"
-    else -> model.lastSync?.let { "Last synced " + DateUtils.getRelativeTimeSpanString(it).toString().lowercase() }
-        ?: "Looking for it on this Wi-Fi…"
+private fun syncText(context: Context, model: AppModel): String = when (model.syncStatus) {
+    SyncClient.Status.Connected -> context.getString(R.string.sync_connected)
+    SyncClient.Status.Connecting -> context.getString(R.string.sync_connecting)
+    is SyncClient.Status.Failed -> context.getString(R.string.sync_not_syncing)
+    else -> model.lastSync?.let { context.getString(R.string.sync_last_synced, DateUtils.getRelativeTimeSpanString(it).toString().lowercase()) }
+        ?: context.getString(R.string.sync_searching)
 }
 
 @Composable
 private fun SmartLifeSection(model: AppModel, open: (Route) -> Unit, confirm: (Confirmation) -> Unit) {
-    Section("Smart Life") {
+    Section(stringResource(R.string.service_smart_life)) {
         if (model.smartLifeConnected) {
+            // Read in the composable scope: a button's callback is a plain lambda, where a
+            // resource cannot be looked up any more.
+            val signOutTitle = stringResource(R.string.confirm_signout_title)
+            val signOutMessage = stringResource(R.string.confirm_signout_message)
+            val signOutAction = stringResource(R.string.action_sign_out)
             Card {
-                ListRow(R.drawable.lucide_shield_check, model.smartLifeAccount.ifEmpty { "Signed in" },
+                ListRow(R.drawable.lucide_shield_check, model.smartLifeAccount.ifEmpty { stringResource(R.string.smartlife_signed_in) },
                     when (model.linkedDevices) {
-                        0 -> "No devices linked in this floor plan"
-                        1 -> "Controlling 1 device"
-                        else -> "Controlling ${model.linkedDevices} devices"
+                        0 -> stringResource(R.string.smartlife_no_devices)
+                        1 -> stringResource(R.string.smartlife_controlling_one)
+                        else -> stringResource(R.string.smartlife_controlling_many, model.linkedDevices)
                     }, Palette.green)
             }
-            SecondaryButton("Sign out", tint = Palette.red) {
-                confirm(Confirmation("Sign out of Smart Life?", "Lights and air conditioners go back to being simulated on this phone.", "Sign out") {
+            SecondaryButton(stringResource(R.string.action_sign_out), tint = Palette.red) {
+                confirm(Confirmation(signOutTitle, signOutMessage, signOutAction) {
                     model.signOut()
                 })
             }
@@ -203,29 +230,27 @@ private fun SmartLifeSection(model: AppModel, open: (Route) -> Unit, confirm: (C
                     IconBadge(R.drawable.lucide_plug, Palette.smartLife)
                     Spacer(Modifier.width(14.dp))
                     androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("Not signed in", style = Type.title)
-                        Text("Sign in with your Smart Life or Tuya Smart account and the lamps and air conditioners linked to it in your " +
-                            "floor plan become the real ones.", style = TextStyle(fontSize = 14.sp, color = Palette.muted, lineHeight = 19.sp))
+                        Text(stringResource(R.string.smartlife_not_signed_in), style = Type.title)
+                        Text(stringResource(R.string.smartlife_not_signed_in_detail), style = TextStyle(fontSize = 14.sp, color = Palette.muted, lineHeight = 19.sp))
                     }
                 }
             }
-            SecondaryButton("Connect Smart Life", icon = R.drawable.lucide_link_2) { open(Route.SmartLife) }
+            SecondaryButton(stringResource(R.string.action_connect_smartlife), icon = R.drawable.lucide_link_2) { open(Route.SmartLife) }
         }
     }
 }
 
 @Composable
 private fun ConnectionsSection(model: AppModel, open: (Route) -> Unit) {
-    Section("More connections") {
+    Section(stringResource(R.string.settings_section_connections)) {
         Card {
-            LinkRow(R.drawable.lucide_house_wifi, "Home Assistant", model.homeAssistantName ?: "Connect your server", Palette.homeAssistant,
+            LinkRow(R.drawable.lucide_house_wifi, stringResource(R.string.service_home_assistant), model.homeAssistantName ?: stringResource(R.string.conn_connect_server), Palette.homeAssistant,
                 status = if (model.homeAssistantName != null) Palette.green else null) { open(Route.HomeAssistant) }
             RowDivider()
-            LinkRow(R.drawable.lucide_lightbulb, "Philips Hue", model.hueName ?: "Pair your Hue Bridge", Palette.hue,
+            LinkRow(R.drawable.lucide_lightbulb, stringResource(R.string.service_philips_hue), model.hueName ?: stringResource(R.string.conn_pair_hue_bridge), Palette.hue,
                 status = if (model.hueName != null) Palette.green else null) { open(Route.Hue) }
         }
-        Footnote("Home Assistant and Hue set up here or on your paired computer work on both, shared over your encrypted link. " +
-            "Apple Home exists only on Apple devices: add HomeKit or Matter accessories to Home Assistant to switch them here.")
+        Footnote(stringResource(R.string.connections_footnote))
     }
 }
 
@@ -233,31 +258,30 @@ private fun ConnectionsSection(model: AppModel, open: (Route) -> Unit) {
 private fun AboutSection() {
     val context = LocalContext.current
     fun browse(url: String) = runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
-    Section("About") {
+    Section(stringResource(R.string.settings_section_about)) {
         Card {
-            InfoRow("Version", "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+            InfoRow(stringResource(R.string.about_version), "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
             RowDivider()
-            InfoRow("Privacy", "No account, no analytics")
+            InfoRow(stringResource(R.string.about_privacy), stringResource(R.string.about_no_account))
         }
-        Footnote("House Control talks to your own devices: Tuya's servers for Smart Life, your Home Assistant, your Hue Bridge and " +
-            "your paired computer. Nothing else leaves this phone.")
+        Footnote(stringResource(R.string.about_footnote))
         Card {
-            LinkRow(R.drawable.lucide_globe, "Website", "Features, help and the Mac app", external = true) { browse(About.WEBSITE) }
+            LinkRow(R.drawable.lucide_globe, stringResource(R.string.about_website), stringResource(R.string.about_website_detail), external = true) { browse(About.WEBSITE) }
             RowDivider()
-            LinkRow(R.drawable.lucide_shield_check, "Privacy Policy", "Nothing is collected", Palette.green, external = true) { browse(About.PRIVACY) }
+            LinkRow(R.drawable.lucide_shield_check, stringResource(R.string.about_privacy_policy), stringResource(R.string.about_nothing_collected), Palette.green, external = true) { browse(About.PRIVACY) }
             RowDivider()
-            LinkRow(R.drawable.lucide_circle_question_mark, "Support", "Questions and problems", Palette.warm, external = true) { browse(About.SUPPORT) }
+            LinkRow(R.drawable.lucide_circle_question_mark, stringResource(R.string.about_support), stringResource(R.string.about_support_detail), Palette.warm, external = true) { browse(About.SUPPORT) }
         }
     }
-    Section("Developer") {
+    Section(stringResource(R.string.settings_section_developer)) {
         Card {
-            LinkRow(R.drawable.lucide_at_sign, "${About.DEVELOPER} on X", "@0xProbabillity", Palette.text, external = true) { browse(About.X) }
+            LinkRow(R.drawable.lucide_at_sign, stringResource(R.string.about_dev_on_x, About.DEVELOPER), "@0xProbabillity", Palette.text, external = true) { browse(About.X) }
             RowDivider()
-            LinkRow(R.drawable.lucide_code_xml, "${About.DEVELOPER} on GitHub", "github.com/0xProbabillity", Palette.text, external = true) {
+            LinkRow(R.drawable.lucide_code_xml, stringResource(R.string.about_dev_on_github, About.DEVELOPER), "github.com/0xProbabillity", Palette.text, external = true) {
                 browse(About.GITHUB)
             }
             RowDivider()
-            LinkRow(R.drawable.lucide_package, "Source code", "House Control is open source", Palette.text, external = true) { browse(About.SOURCE) }
+            LinkRow(R.drawable.lucide_package, stringResource(R.string.about_source_code), stringResource(R.string.about_open_source), Palette.text, external = true) { browse(About.SOURCE) }
         }
     }
 }

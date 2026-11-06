@@ -65,6 +65,28 @@
 | ✓ **Philips Hue** | The Hue Bridge's local API (CLIP v2): press its button once. Found on the Wi-Fi by itself |
 | — **Apple Home** | HomeKit exists only on Apple devices. Add HomeKit or Matter accessories to Home Assistant to switch them here |
 
+## Languages
+
+House Control speaks English and Simplified Chinese.
+
+The app follows the language of your phone. The native screens — **Settings**, **Devices**, the
+connections — read their text from Android's own resources, and the 3D home, the panel and the
+floor plan editor, which run in a WebView, read the same wording from a dictionary that travels
+with the app. English stays the default, and a label the dictionary does not know is shown as
+it is written.
+
+- **English** (default) — `app/src/main/res/values/strings.xml`, and the English words in the web UI.
+- **Simplified Chinese** — `app/src/main/res/values-zh-rCN/strings.xml` and `web/src/locales/zh-CN.js`.
+
+On Android 13 and later the app's language is also listed in **Settings → Apps → House Control →
+Language**; on earlier versions it follows the system language.
+
+[中文说明](README.zh-CN.md)
+
+Want a language of your own? Add a `values-xx/strings.xml` with the same names, add a dictionary
+in `web/src/locales/`, and list it in `app/src/main/res/xml/locales_config.xml`. Nothing else has
+to change.
+
 ## Install
 
 1. Download `house-control-<version>.apk` from [Releases](../../releases).
@@ -106,6 +128,8 @@ Everything is set up on the phone, in **Settings** (the sliders button at the to
 - **Devices** lists every lamp and AC of the plan by room; tap one and pick its real device from everything your
   connected platforms have, or **Add devices to a room** to put several in at once, already linked.
 - **Smart Life**, **Home Assistant** and **Philips Hue** connect right there.
+- **Export backup** writes the floor plan and this phone's own settings into one file: into the
+  downloads folder, or shared to another app. **Import file** takes it back.
 
 ### Smart Life
 
@@ -173,6 +197,8 @@ Bridge — to your paired Mac or PC, and to nothing else. There is no account, n
 - The Smart Life session, the Home Assistant token, the Hue key and the computer's pairing key are encrypted with AES-GCM
   under a non-exportable Android Keystore key, and are left out of backups. **Sign out** / **Disconnect** /
   **Unpair** delete them. No log contains a token or a key.
+- A **backup** holds the floor plan and the app's own settings, and no passwords: the Home
+  Assistant token, the Hue key and the Smart Life session are never written into one.
 - The Hue Bridge's certificate is self-signed: the phone trusts it when pairing, remembers its SHA-256 fingerprint
   and refuses any other device at that address afterwards.
 - Home Assistant is usually reached over plain `http://` on the home network, so the app allows cleartext traffic;

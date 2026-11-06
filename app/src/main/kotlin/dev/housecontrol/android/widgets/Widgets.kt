@@ -106,12 +106,12 @@ fun lampIcon(type: String) = when (type) {
 }
 
 /** "3 lights on · 23°", or how the home rests. */
-fun statusLine(snapshot: HomeSnapshot): String {
+fun statusLine(context: Context, snapshot: HomeSnapshot): String {
     val on = snapshot.lightsOn
     val lights = when (on) {
-        0 -> "All lights off"
-        1 -> "1 light on"
-        else -> "$on lights on"
+        0 -> context.getString(R.string.widget_status_all_off)
+        1 -> context.getString(R.string.widget_status_one_on)
+        else -> context.getString(R.string.widget_status_n_on, on)
     }
     val ac = snapshot.acsOn.firstOrNull()?.let { " · ${it.optDouble("target").roundToInt()}°" } ?: ""
     return lights + ac
@@ -124,7 +124,7 @@ private fun Empty() {
         GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_background)).padding(16.dp).clickable(openApp(context)),
         contentAlignment = Alignment.Center,
     ) {
-        Text("Open House Control once to show your home here.", style = TextStyle(color = muted, fontSize = 13.sp))
+        Text(context.getString(R.string.widget_empty), style = TextStyle(color = muted, fontSize = 13.sp))
     }
 }
 
@@ -171,9 +171,9 @@ class HomeWidget : GlanceAppWidget() {
                 Spacer(GlanceModifier.width(6.dp))
                 Text(snapshot.name, maxLines = 1, style = TextStyle(color = text, fontSize = 14.sp, fontWeight = FontWeight.Bold),
                     modifier = GlanceModifier.defaultWeight())
-                Text(statusLine(snapshot), maxLines = 1, style = TextStyle(color = muted, fontSize = 12.sp))
+                Text(statusLine(context, snapshot), maxLines = 1, style = TextStyle(color = muted, fontSize = 12.sp))
             }
-            Image(ImageProvider(bitmap), "Floor plan of ${snapshot.name}",
+            Image(ImageProvider(bitmap), context.getString(R.string.widget_floor_plan_cd, snapshot.name),
                 GlanceModifier.fillMaxWidth().defaultWeight().padding(vertical = 4.dp).clickable(openApp(context)))
             if (sceneRow && snapshot.scenes.isNotEmpty()) {
                 val fit = max(1, ((size.width.value - 24) / 96).toInt())
@@ -243,13 +243,14 @@ class LightsWidget : GlanceAppWidget() {
 
     @Composable
     private fun Lights(snapshot: HomeSnapshot) {
+        val context = LocalContext.current
         val rooms = snapshot.rooms.associate { it.optString("id") to it.optString("name") }
         val anyOn = snapshot.lightsOn > 0
         Column(GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_background)).padding(10.dp)) {
             Row(GlanceModifier.fillMaxWidth().padding(start = 4.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(GlanceModifier.defaultWeight()) {
-                    Text("Lights", style = TextStyle(color = text, fontSize = 14.sp, fontWeight = FontWeight.Bold))
-                    Text(statusLine(snapshot), maxLines = 1, style = TextStyle(color = muted, fontSize = 12.sp))
+                    Text(context.getString(R.string.widget_lights_header), style = TextStyle(color = text, fontSize = 14.sp, fontWeight = FontWeight.Bold))
+                    Text(statusLine(context, snapshot), maxLines = 1, style = TextStyle(color = muted, fontSize = 12.sp))
                 }
                 Row(
                     GlanceModifier.background(ImageProvider(R.drawable.widget_chip)).padding(horizontal = 12.dp, vertical = 7.dp)
@@ -258,7 +259,7 @@ class LightsWidget : GlanceAppWidget() {
                 ) {
                     Image(ImageProvider(R.drawable.lucide_power), null, GlanceModifier.size(14.dp), colorFilter = ColorFilter.tint(if (anyOn) warm else text))
                     Spacer(GlanceModifier.width(6.dp))
-                    Text(if (anyOn) "All off" else "All on", style = TextStyle(color = text, fontSize = 12.sp, fontWeight = FontWeight.Medium))
+                    Text(if (anyOn) context.getString(R.string.widget_all_off) else context.getString(R.string.widget_all_on), style = TextStyle(color = text, fontSize = 12.sp, fontWeight = FontWeight.Medium))
                 }
             }
             // As many lamps as fit; a plain column redraws reliably, unlike a collection.
@@ -279,8 +280,10 @@ class LightsWidget : GlanceAppWidget() {
                             Text(light.optString("name"), maxLines = 1, style = TextStyle(color = text, fontSize = 13.sp, fontWeight = FontWeight.Medium))
                             Text(rooms[light.optString("room")] ?: "", maxLines = 1, style = TextStyle(color = muted, fontSize = 11.sp))
                         }
-                        Text(if (!on) "Off" else if ("brightness" in light.optJSONArray("capabilities").toString())
-                            "${(light.optDouble("brightness", 1.0) * 100).roundToInt()}%" else "On",
+                        Text(if (!on) context.getString(R.string.widget_switch_off)
+                            else if ("brightness" in light.optJSONArray("capabilities").toString())
+                                context.getString(R.string.widget_brightness, (light.optDouble("brightness", 1.0) * 100).roundToInt())
+                            else context.getString(R.string.widget_switch_on),
                             style = TextStyle(color = if (on) warm else muted, fontSize = 12.sp))
                     }
                     Spacer(GlanceModifier.height(5.dp))

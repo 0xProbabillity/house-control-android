@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
         if (data.host == "action") {
             val kind = data.getQueryParameter("kind") ?: return
             val action = HomeAction(kind, data.getQueryParameter("id"), data.getQueryParameter("on")?.toBooleanStrictOrNull())
-            model.runQuickAction(action, data.getQueryParameter("title") ?: "Done")
+            model.runQuickAction(action, data.getQueryParameter("title") ?: getString(R.string.action_done))
             return
         }
         model.open(data.toString())
