@@ -1,5 +1,6 @@
 package dev.housecontrol.android.core
 
+import dev.housecontrol.android.BuildConfig
 import dev.housecontrol.android.smartlife.CloudLink
 import dev.housecontrol.android.smartlife.CommandRejection
 import dev.housecontrol.android.smartlife.SmartLifePlatform
@@ -23,7 +24,7 @@ class DeviceHub(
     private val scope: CoroutineScope,
     secret: (String) -> SecretStore,
     /** Smart Life, in the builds that include it. */
-    val cloud: SmartLifePlatform? = SmartLifePlatform(secret("smartlife"), secret("tuya")),
+    val cloud: SmartLifePlatform? = if (BuildConfig.SMART_LIFE) SmartLifePlatform(secret("smartlife"), secret("tuya")) else null,
 ) {
     val log = EventLog(directory)
     val homeAssistant = HomeAssistantService(secret("homeassistant"), scope)

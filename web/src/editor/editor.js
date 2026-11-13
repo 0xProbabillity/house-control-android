@@ -26,7 +26,7 @@ const WALLS = ['north', 'east', 'south', 'west'];
 const LEVEL_NAMES = ['Ground floor', 'First floor', 'Second floor', 'Third floor', 'Fourth floor', 'Fifth floor'];
 const HANDLES = { nw: [0, 0], n: [0.5, 0], ne: [1, 0], e: [1, 0.5], se: [1, 1], s: [0.5, 1], sw: [0, 1], w: [0, 0.5] };
 const MIN_ROOM = 0.6; // metres, either way
-const SCENE_ICONS = ['sun', 'sofa', 'film', 'moon', 'door', 'table', 'bed', 'tv', 'sparkles'];
+const SCENE_ICONS = ['sun', 'sofa', 'film', 'moon', 'door', 'table', 'bed', 'tv', 'power', 'sparkles'];
 const REGIONS = [
   ['eu', 'Central Europe'], ['eu-w', 'Western Europe'], ['us', 'Western America'], ['us-e', 'Eastern America'],
   ['cn', 'China'], ['in', 'India'], ['sg', 'Singapore'],
@@ -1324,7 +1324,10 @@ export async function bootEditor(root) {
         row(bind('To X', number(), { ...at(item, 'to', 0), parse: parseNum }), bind('To Z', number(), { ...at(item, 'to', 1), parse: parseNum })),
         item.type === 'window' ? row(bind('Sill, m', number(), { ...prop(item, 'sill', 0.85), parse: parseNum }),
           bind('Head, m', number(), { ...prop(item, 'head', 2.1), parse: parseNum })) : null,
-        h('p.note', 'Drag it along a wall, or onto another one: it snaps to the walls (hold ⌥ not to). Drag the dots at its ends to make it wider. Windows only show on the far walls; the walls facing the camera are cut away.')));
+        h('p.note', (isPhone
+          ? 'Drag it along a wall. To turn it, drag it onto a wall that runs the other way: it snaps to that wall and turns with it. Drag the dots at its ends to make it wider.'
+          : 'Drag it along a wall. To turn it, drag it onto a wall that runs the other way: it snaps to that wall and turns with it (hold ⌥ not to snap). Drag the dots at its ends to make it wider.')
+          + ' Windows only show on the far walls; the walls facing the camera are cut away.')));
     } else if (kind === 'scene') {
       head(item.name || item.id, `id: ${item.id}`);
       item.lights ||= {};
@@ -1337,7 +1340,15 @@ export async function bootEditor(root) {
       });
       const tri = () => choice([['', 'Leave as is'], ['on', 'On'], ['off', 'Off']]);
       nodes.push(section('Scene',
-        row(bind('Name', text(), prop(item, 'name', '')), bind('Icon', choice(SCENE_ICONS), { ...prop(item, 'icon', 'sun'), event: 'change' }))),
+        row(bind('Name', text(), prop(item, 'name', '')), bind('Icon', choice(SCENE_ICONS), { ...prop(item, 'icon', 'sun'), event: 'change' })),
+        bind('On/off button', h('input', { type: 'checkbox' }), {
+          get: () => item.toggle === true,
+          set: (v) => { if (v) item.toggle = true; else delete item.toggle; },
+          event: 'change',
+        }),
+        h('p.note', item.toggle
+          ? 'A tap turns on the lights set to On; the next tap, while any of them is on, turns them off again.'
+          : 'Tick it for a room button: one tap on, the next tap off.')),
       section('Lights',
         bind('All lights (default)', tri(), { ...rule('*'), event: 'change' }),
         doc.lights.map((l) => bind(`${l.name} · ${roomName(l.room)}`, tri(), { ...rule(l.id), event: 'change' })),

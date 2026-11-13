@@ -187,6 +187,15 @@ class SmartLifeService(private val vault: SecretStore, private val client: OkHtt
         request("POST", "/v1.1/m/thing/$deviceId/commands", body = jsonOf("commands" to JSONArray(commands)))
     }
 
+    /**
+     * DIY IR keys are not standard device data points. Smart Life Tap-to-Run wraps the
+     * learned key and is reachable through the same device-sharing session.
+     */
+    suspend fun triggerScene(homeId: String, sceneId: String) {
+        val result = request("POST", "/v1.0/m/scene/ha/trigger", body = jsonOf("homeId" to homeId, "sceneId" to sceneId))
+        if (result != true) throw TuyaFailure("Smart Life did not run the linked IR command")
+    }
+
     override suspend fun prepare(deviceId: String) {
         if (deviceId !in knownRanges) loadSpecification(deviceId)
     }

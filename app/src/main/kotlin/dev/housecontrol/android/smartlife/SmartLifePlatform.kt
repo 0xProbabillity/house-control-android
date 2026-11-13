@@ -43,6 +43,28 @@ class SmartLifePlatform(smartLifeVault: SecretStore, tuyaVault: SecretStore) {
     suspend fun command(appId: String, kind: String, link: JSONObject, patch: JSONObject, state: JSONObject, log: EventLog) {
         val cloud = active ?: return
         val deviceId = link.string("deviceId") ?: return
+        if (kind == "light" && link.has("sceneSwitch")) {
+            // A learned IR light: on and off are two Smart Life Tap-to-Run scenes.
+            val pair = link.optJSONObject("sceneSwitch")
+            val home = pair?.string("homeId")
+            val onScene = pair?.string("on")
+            val offScene = pair?.string("off")
+            val on = patch.opt("on") as? Boolean
+            if (home.isNullOrEmpty() || onScene.isNullOrEmpty() || offScene.isNullOrEmpty() || onScene == offScene || on == null) {
+                throw CommandRejection("Link separate Smart Life ON and OFF commands for this IR light", patch.keys().asSequence().toList())
+            }
+            val extra = patch.keys().asSequence().filter { it != "on" }.toList()
+            if (extra.isNotEmpty()) throw CommandRejection("This IR light supports on/off only", extra)
+            if (!smartLife.isConfigured) throw CommandRejection("Connect Smart Life to use this IR switch", listOf("on"))
+            try {
+                smartLife.triggerScene(home, if (on) onScene else offScene)
+                log.write("$appId IR ${if (on) "on" else "off"} via Smart Life → ok")
+            } catch (error: Exception) {
+                log.write("$appId IR ${if (on) "on" else "off"} via Smart Life → ${error.message}")
+                throw error
+            }
+            return
+        }
         // The first command to a device may arrive before anything is known about it.
         cloud.prepare(deviceId)
         val codes = cloud.knownCodes[deviceId].orEmpty()
@@ -85,6 +107,8 @@ class SmartLifePlatform(smartLifeVault: SecretStore, tuyaVault: SecretStore) {
         val features = JSONObject()
         for ((id, entry) in entries) {
             val deviceId = entry.link.string("deviceId") ?: continue
+            // A learned IR key has no reported power state; the last command stands.
+            if (entry.link.has("sceneSwitch")) continue
             if (entry.kind == "ac") {
                 TuyaMapper.acFeatures(cloud.knownCodes[deviceId].orEmpty(), cloud.knownRanges[deviceId].orEmpty())?.let { features.put(id, it) }
             }

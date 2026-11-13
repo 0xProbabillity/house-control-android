@@ -47,6 +47,7 @@ fun SettingsScreen(model: AppModel, open: (Route) -> Unit, close: () -> Unit) {
     var confirm by remember { mutableStateOf<Confirmation?>(null) }
     Screen("Settings", onClose = close) {
         HomeSection(model, open)
+        EarlierSection(model) { confirm = it }
         ShortcutsSection(model, open)
         MacSection(model, open) { confirm = it }
         if (model.hub.cloud != null) SmartLifeSection(model, open) { confirm = it }
@@ -107,6 +108,30 @@ private fun HomeSection(model: AppModel, open: (Route) -> Unit) {
         if (!model.hasCustomPlan) {
             Footnote("Make your own home here, or pair with House Control on a Mac or PC and the one drawn there arrives by itself.")
         }
+    }
+}
+
+/** The copies of the home kept before something replaced it; a tap brings one back. */
+@Composable
+private fun EarlierSection(model: AppModel, confirm: (Confirmation) -> Unit) {
+    val earlier = remember(model.activePlan, model.customPlanName) { model.earlierHomes() }
+    if (earlier.isEmpty()) return
+    val format = remember { java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT) }
+    Section("Earlier homes") {
+        Card {
+            earlier.take(8).forEachIndexed { i, home ->
+                if (i > 0) RowDivider()
+                val rooms = if (home.rooms == 1) "1 room" else "${home.rooms} rooms"
+                val devices = if (home.devices == 1) "1 device" else "${home.devices} devices"
+                ListRow(R.drawable.lucide_refresh_ccw, home.name, "${format.format(java.util.Date(home.date))} · $rooms, $devices",
+                    Palette.accent, onClick = {
+                        confirm(Confirmation("Bring back ${home.name}?",
+                            "It becomes the home on this phone and on the paired Mac. The home there now is kept here too.",
+                            "Bring back") { model.restoreEarlier(home) })
+                    })
+            }
+        }
+        Footnote("Before a file, the editor or a paired Mac replaces the home, the one there is kept here.")
     }
 }
 
@@ -239,7 +264,7 @@ private fun AboutSection() {
             RowDivider()
             InfoRow("Privacy", "No account, no analytics")
         }
-        Footnote("House Control talks to your own devices: Tuya's servers for Smart Life, your Home Assistant, your Hue Bridge and " +
+        Footnote("House Control talks to your own devices: " + (if (BuildConfig.SMART_LIFE) "Tuya's servers for Smart Life, " else "") + "your Home Assistant, your Hue Bridge and " +
             "your paired computer. Nothing else leaves this phone.")
         Card {
             LinkRow(R.drawable.lucide_globe, "Website", "Features, help and the Mac app", external = true) { browse(About.WEBSITE) }
@@ -252,12 +277,15 @@ private fun AboutSection() {
     Section("Developer") {
         Card {
             LinkRow(R.drawable.lucide_at_sign, "${About.DEVELOPER} on X", "@0xProbabillity", Palette.text, external = true) { browse(About.X) }
+            // The Play edition leaves out GitHub: its pages carry donation addresses and APK downloads.
+            if (!BuildConfig.PLAY_STORE) {
             RowDivider()
             LinkRow(R.drawable.lucide_code_xml, "${About.DEVELOPER} on GitHub", "github.com/0xProbabillity", Palette.text, external = true) {
                 browse(About.GITHUB)
             }
             RowDivider()
             LinkRow(R.drawable.lucide_package, "Source code", "House Control is open source", Palette.text, external = true) { browse(About.SOURCE) }
+            }
         }
     }
 }

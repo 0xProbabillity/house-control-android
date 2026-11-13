@@ -1,5 +1,6 @@
 package dev.housecontrol.android.ui
 
+import dev.housecontrol.android.BuildConfig
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -125,7 +126,8 @@ fun DevicesScreen(model: AppModel, back: () -> Unit) {
                     IconBadge(R.drawable.lucide_link_2, Palette.warm)
                     Column(Modifier.padding(start = 14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text("Nothing connected yet", style = Type.title)
-                        Text("Connect Smart Life, Home Assistant or Philips Hue in Settings first; their devices then appear here to choose from.",
+                        Text((if (BuildConfig.SMART_LIFE) "Connect Smart Life, Home Assistant or Philips Hue" else "Connect Home Assistant or Philips Hue") +
+                            " in Settings first; their devices then appear here to choose from.",
                             style = TextStyle(fontSize = 14.sp, color = Palette.muted, lineHeight = 19.sp))
                     }
                 }

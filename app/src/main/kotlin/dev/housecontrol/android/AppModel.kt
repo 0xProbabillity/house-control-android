@@ -280,6 +280,22 @@ class AppModel(private val context: Context) {
         sync.sendPlan(data) // when the Mac is away, the next sync sends it
     }
 
+    /** Copies of the home kept before a file, the editor or the Mac replaced it, newest first. */
+    fun earlierHomes() = plans.earlierHomes()
+
+    /** Brings back a kept copy as the home (the current one is kept in turn) and hands it to the Mac. */
+    fun restoreEarlier(earlier: PlanStore.Earlier) {
+        val data = try {
+            plans.restore(earlier)
+        } catch (_: Exception) {
+            show(Banner(Banner.Kind.Error, "Could not bring that home back"))
+            return
+        }
+        reloadHome()
+        sync.sendPlan(data)
+        show(Banner(Banner.Kind.Success, "${earlier.name} is back"))
+    }
+
     /** Starts a new home on this phone: an empty one with one room, or a copy of a demo layout. The editor opens on it. */
     fun createHome(name: String, template: String?) {
         val plan = template?.let(::bundledPlan) ?: PlanEditor.blank(name)

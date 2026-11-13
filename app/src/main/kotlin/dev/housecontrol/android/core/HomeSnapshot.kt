@@ -122,7 +122,12 @@ class HomeSnapshot(val json: JSONObject) {
             }
             HomeAction.SCENE -> {
                 val definition = scenes.firstOrNull { it.optString("id") == action.id }
-                if (definition != null) {
+                if (definition != null && definition.optBoolean("toggle") && isActive(definition)) {
+                    // An on/off scene (a room button) a second time turns its lamps and ACs off again.
+                    changes += targets(definition, "lights", lights).mapNotNull { writeLight(it, jsonOf("on" to false)) }
+                    changes += targets(definition, "acs", acs).mapNotNull { writeAC(it, jsonOf("on" to false)) }
+                    if (scene == action.id) setScene(null)
+                } else if (definition != null) {
                     val lightRules = definition.optJSONObject("lights") ?: JSONObject()
                     val acRules = definition.optJSONObject("acs") ?: JSONObject()
                     for (light in lights) {
@@ -157,6 +162,22 @@ class HomeSnapshot(val json: JSONObject) {
         }
         if (changes.isNotEmpty()) json.put("updated", System.currentTimeMillis() / 1000.0)
         return resolved to changes
+    }
+
+    /** True while `scene` is in force: an on/off scene while any lamp it turns on is lit. */
+    fun isActive(scene: JSONObject): Boolean {
+        if (!scene.optBoolean("toggle")) return this.scene == scene.optString("id")
+        return targets(scene, "lights", lights).any { it.optBoolean("on") }
+    }
+
+    /** The devices among `devices` a scene switches on: named ones, or all when "*" does. */
+    private fun targets(scene: JSONObject, kind: String, devices: List<JSONObject>): List<JSONObject> {
+        val rules = scene.optJSONObject(kind) ?: return emptyList()
+        return devices.filter {
+            val own = rules.optJSONObject(it.optString("id"))
+            val on = if (own != null && own.has("on")) own.opt("on") else rules.optJSONObject("*")?.opt("on")
+            on == true
+        }
     }
 
     private fun setScene(id: String?) {

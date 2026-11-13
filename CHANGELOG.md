@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.0
+
+- **On/off scenes.** Tick **On/off button** on a scene in the editor and it becomes a room button: a tap turns its
+  lights on, the next tap (while any of them is on) turns them off. It shows as on while its lights are lit, in the
+  panel and the widgets.
+- **Earlier homes.** Before a file, the editor or a paired Mac replaces the home, the one there is kept.
+  **Settings → Earlier homes** brings one back, here and on the paired Mac.
+- **Learned IR lights** (a Smart Life DIY remote key) switch through their Smart Life ON and OFF Tap-to-Run scenes.
+- The editor says how to turn a door or a window: drag it onto a wall that runs the other way.
+- **Two editions:** the APK on GitHub (with Smart Life, as before) and Google Play (`com.oxprobabillity.housecontrol`,
+  Home Assistant and Hue, no Smart Life).
+
 ## 1.2.0
 
 - **Turn the home all the way round** with one finger, and tilt it from nearly level with the floor to straight down.

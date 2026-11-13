@@ -55,9 +55,26 @@ android {
         applicationId = "dev.housecontrol.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Two editions: "github" (APK on GitHub Releases, with Smart Life) and "play" (Google Play:
+    // its own package, no Smart Life, no links to pages that ask for donations or sideloading).
+    flavorDimensions += "store"
+    productFlavors {
+        create("github") {
+            dimension = "store"
+            buildConfigField("boolean", "SMART_LIFE", "true")
+            buildConfigField("boolean", "PLAY_STORE", "false")
+        }
+        create("play") {
+            dimension = "store"
+            applicationId = "com.oxprobabillity.housecontrol"
+            buildConfigField("boolean", "SMART_LIFE", "false")
+            buildConfigField("boolean", "PLAY_STORE", "true")
+        }
     }
 
     signingConfigs {

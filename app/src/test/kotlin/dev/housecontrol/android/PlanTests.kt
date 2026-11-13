@@ -122,4 +122,30 @@ class PlanTests {
         assertEquals("x", home.linksPlan.getJSONArray("lights").getJSONObject(0).getJSONObject("link").getString("id"))
         assertEquals(false, home.panelState.getJSONObject("lights").getJSONObject("a").getBoolean("on"))
     }
+
+    @Test fun anOnOffSceneTurnsItsLampsOffTheSecondTime() {
+        val snapshot = HomeSnapshot(JSONObject("""{"name":"Home","plan":"custom","rooms":[],
+            "lights":[{"id":"a","on":false,"capabilities":[]},{"id":"b","on":false,"capabilities":[]},{"id":"c","on":true,"capabilities":[]}],
+            "acs":[],"scenes":[{"id":"living","toggle":true,"lights":{"a":{"on":true},"b":{"on":true}},"acs":{}}]}"""))
+        val scene = snapshot.scenes.first()
+        assertFalse(snapshot.isActive(scene))
+        assertEquals(2, snapshot.apply(HomeAction(HomeAction.SCENE, "living", null)).second.size)
+        assertTrue(snapshot.isActive(scene))
+        snapshot.apply(HomeAction(HomeAction.SCENE, "living", null))
+        assertFalse(snapshot.light("a")!!.optBoolean("on"))
+        assertFalse(snapshot.isActive(scene))
+        assertTrue("A lamp the scene does not name stays as it was", snapshot.light("c")!!.optBoolean("on"))
+    }
+
+    @Test fun replacingTheHomeKeepsTheOldOne() {
+        val store = PlanStore(Files.createTempDirectory("plans").toFile())
+        store.saveCustom("""{"name":"Old","rooms":[{"id":"r1"}]}""".toByteArray())
+        store.saveCustom("""{"name":"New","rooms":[{"id":"r2"}]}""".toByteArray())
+        val kept = store.earlierHomes()
+        assertEquals(1, kept.size)
+        assertEquals("Old", kept[0].name)
+        store.restore(kept[0])
+        assertEquals("Old", store.customPlanName)
+        assertTrue("The home it replaced is kept in turn", store.earlierHomes().any { it.name == "New" })
+    }
 }

@@ -180,7 +180,7 @@ class HomeWidget : GlanceAppWidget() {
                 Row(GlanceModifier.fillMaxWidth()) {
                     snapshot.scenes.take(fit).forEachIndexed { i, scene ->
                         if (i > 0) Spacer(GlanceModifier.width(6.dp))
-                        SceneChip(scene, scene.optString("id") == snapshot.scene, GlanceModifier.defaultWeight())
+                        SceneChip(scene, snapshot.isActive(scene), GlanceModifier.defaultWeight())
                     }
                 }
             }
@@ -215,7 +215,7 @@ class ScenesWidget : GlanceAppWidget() {
                 Row(GlanceModifier.fillMaxWidth()) {
                     line.forEachIndexed { i, scene ->
                         if (i > 0) Spacer(GlanceModifier.width(6.dp))
-                        SceneChip(scene, scene.optString("id") == snapshot.scene, GlanceModifier.defaultWeight().height(40.dp))
+                        SceneChip(scene, snapshot.isActive(scene), GlanceModifier.defaultWeight().height(40.dp))
                     }
                     repeat(columns - line.size) {
                         Spacer(GlanceModifier.width(6.dp))

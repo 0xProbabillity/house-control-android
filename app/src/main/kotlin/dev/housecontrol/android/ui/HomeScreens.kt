@@ -1,5 +1,6 @@
 package dev.housecontrol.android.ui
 
+import dev.housecontrol.android.BuildConfig
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,7 +69,8 @@ fun WelcomeScreen(model: AppModel) {
             Feature(R.drawable.lucide_pencil_ruler, Palette.accent, "Draw it here or on your computer",
                 "Rooms, lamps and ACs, on this phone. Pair a Mac or PC any time: both stay in sync.")
             Feature(R.drawable.lucide_lightbulb, Palette.green, "Your real devices",
-                "Smart Life, Home Assistant and Philips Hue. Until you connect one, everything is simulated.")
+                (if (BuildConfig.SMART_LIFE) "Smart Life, Home Assistant and Philips Hue." else "Home Assistant and Philips Hue.") +
+                    " Until you connect one, everything is simulated.")
         }
         PrimaryButton("Set up my home", icon = R.drawable.lucide_house) { model.finishWelcome(AppModel.WelcomeChoice.SetUpHere) }
         Spacer(Modifier.size(10.dp))

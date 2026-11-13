@@ -93,7 +93,7 @@ class SmartLifeTests {
     @Test fun hubSimulatesUnlinkedDevicesAndReadsLinks() {
         val dir = Files.createTempDirectory("hub").toFile()
         val scope = TestScope(StandardTestDispatcher())
-        val hub = DeviceHub(dir, scope, { MemorySecretStore() })
+        val hub = DeviceHub(dir, scope, { MemorySecretStore() }, cloud = SmartLifePlatform(MemorySecretStore(), MemorySecretStore()))
         hub.setLinks(JSONObject("""{"lights":[{"id":"a","tuya":{"deviceId":"dev1"}},{"id":"b"},{"id":"c","tuya":{"deviceId":""}}],
             "acs":[{"id":"ac","tuya":{"deviceId":"dev2","sensorId":"s1"}}]}"""))
         assertEquals(2, hub.linkedDeviceCount)
