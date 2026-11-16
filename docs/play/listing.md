@@ -5,8 +5,9 @@ Play Console app id 4972937110613585627, account 0xProbabillity. Free, no ads. C
 Default language English (US). Graphics in this folder: icon-512.png, feature-1024x500.png, phone-*.png
 (the bundled Apartment demo on the emulator, cropped to 2:1; never a real home).
 
-The Play edition leaves out Smart Life (it signs in through Tuya's Home Assistant client, as the iPhone
-App Store edition leaves it out) and the GitHub links (donation addresses, APK downloads). The `github`
+The Play edition leaves out the GitHub links (donation addresses, APK downloads). Since 1.3.1 (5) it has Smart
+Life again, on the owner's decision (2026-11-16): it signs in through Tuya's Home Assistant client id, so Tuya or a
+complaint to Google could end it; the iPhone App Store edition still leaves it out. The `github`
 flavor keeps both and the old package `dev.housecontrol.android`.
 
 ## App name (30)

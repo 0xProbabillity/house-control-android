@@ -55,13 +55,14 @@ android {
         applicationId = "dev.housecontrol.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.3.0"
+        versionCode = 5
+        versionName = "1.3.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // Two editions: "github" (APK on GitHub Releases, with Smart Life) and "play" (Google Play:
-    // its own package, no Smart Life, no links to pages that ask for donations or sideloading).
+    // Two editions: "github" (APK on GitHub Releases) and "play" (Google Play: its own package, no links
+    // to pages that ask for donations or sideloading). Both have Smart Life since 1.3.1 (the owner's call:
+    // it signs in through Tuya's Home Assistant client, which Tuya or Google could object to).
     flavorDimensions += "store"
     productFlavors {
         create("github") {
@@ -72,7 +73,7 @@ android {
         create("play") {
             dimension = "store"
             applicationId = "com.oxprobabillity.housecontrol"
-            buildConfigField("boolean", "SMART_LIFE", "false")
+            buildConfigField("boolean", "SMART_LIFE", "true")
             buildConfigField("boolean", "PLAY_STORE", "true")
         }
     }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1
+
+- **Smart Life in the Google Play edition too.** Sign in with the Smart Life app's QR code in **Settings → Smart Life**;
+  your Smart Life lamps, plugs and air conditioners link to the plan as in the GitHub edition.
+
 ## 1.3.0
 
 - **On/off scenes.** Tick **On/off button** on a scene in the editor and it becomes a room button: a tap turns its
